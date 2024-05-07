@@ -1,4 +1,4 @@
-#include "platform/media/mediaPlatform.h"
+#include "hardware/media/mediaPlatform.h"
 #include "Media.h"
 #include "infra/include/Timestamp.h"
 

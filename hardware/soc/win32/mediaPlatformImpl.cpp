@@ -1,4 +1,4 @@
-#include "platform/soc/win32/mediaPlatformImpl.h"
+#include "hardware/soc/win32/mediaPlatformImpl.h"
 #include "infra/include/Timestamp.h"
 
 namespace media {
