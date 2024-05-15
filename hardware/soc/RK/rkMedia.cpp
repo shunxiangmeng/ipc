@@ -6,7 +6,7 @@
 #include "soc/RK/include/rkaiq/uAPI/rk_aiq_user_api_imgproc.h"
 #include "infra/include/Logger.h"
 
-namespace hardware {
+namespace hal {
 
 #define VI_BUFFER_COUNT 3
 #define MAX_AIQ_CTX 4
@@ -106,7 +106,7 @@ int rk_mpi_isp_init(int channel) {
         return -1;
     }
     tracef("RK_ISP_Init succeed\n");
-    
+
     RK_ISP_Run(channel);
     RK_ISP_SetFrameRate(channel, fps);
 

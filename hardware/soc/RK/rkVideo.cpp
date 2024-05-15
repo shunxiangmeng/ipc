@@ -11,7 +11,7 @@
 #include "rkMedia.h"
 #include "infra/include/Logger.h"
 
-namespace hardware {
+namespace hal {
 
 static void media_video_callback(MEDIA_BUFFER mb);
 

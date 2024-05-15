@@ -10,7 +10,7 @@
 #pragma once
 #include "hal/Video.h"
 
-namespace hardware {
+namespace hal {
 
 class rkVideo : public IVideo {
     rkVideo() = default;

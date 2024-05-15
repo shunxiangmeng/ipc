@@ -11,9 +11,9 @@ void startMedia(MediaStartProc start_proc, MediaStopProc stop_proc) {
 
 bool AppMedia::start() {
 
-    std::vector<VideoEncodeParams> video_encode_params;
+    std::vector<hal::VideoEncodeParams> video_encode_params;
 
-    hardware::IVideo::instance()->initial(0, video_encode_params);
+    hal::IVideo::instance()->initial(0, video_encode_params);
     //media::IMediaPlatform::instance().startVideoStream(0, 0, Func(&AppMedia::onVideoFrame, this));
     //media::IMediaPlatform::instance().startAudioStream(Func(&AppMedia::onAudioFrame, this));
 
