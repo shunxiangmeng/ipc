@@ -8,6 +8,7 @@
 
 namespace media {
 
+#define VI_BUFFER_COUNT 3
 #define MAX_AIQ_CTX 4
 static rk_aiq_sys_ctx_t *g_aiq_ctx[MAX_AIQ_CTX];
 static rk_aiq_working_mode_t g_WDRMode[MAX_AIQ_CTX];
@@ -142,17 +143,18 @@ int rk_mpi_system_init() {
     return ret;
 }
 
-int rk_mpi_vi_create_chn(RK_S32 s32ViPipe, VI_CHN s32ViChnId) {
+int rk_mpi_vi_create_chn(RK_S32 s32ViPipe, VI_CHN s32ViChnId, uint32_t width, uint32_t height) {
     VI_CHN_ATTR_S vi_chn_attr;
     switch(s32ViChnId) {
         case 0: vi_chn_attr.pcVideoNode = RKISPP_CHN0; break;
         case 1: vi_chn_attr.pcVideoNode = RKISPP_CHN1; break;
         case 2: vi_chn_attr.pcVideoNode = RKISPP_CHN2; break;
+        case 3: vi_chn_attr.pcVideoNode = RKISPP_CHN3; break;
         default : break;
     }
-    vi_chn_attr.u32BufCnt = 3;
-    vi_chn_attr.u32Width = 1920;
-    vi_chn_attr.u32Height = 1080;
+    vi_chn_attr.u32BufCnt = VI_BUFFER_COUNT;
+    vi_chn_attr.u32Width = width;
+    vi_chn_attr.u32Height = height;
     vi_chn_attr.enPixFmt = IMAGE_TYPE_NV12;
     vi_chn_attr.enBufType = VI_CHN_BUF_TYPE_MMAP;
     vi_chn_attr.enWorkMode = VI_WORK_MODE_NORMAL;
@@ -172,6 +174,48 @@ int rk_mpi_vi_create_chn(RK_S32 s32ViPipe, VI_CHN s32ViChnId) {
 }
 
 int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, OutCbFunc cbVenc) {
+    if (s32VencChnId >= VENC_MAX_CHN_NUM) {
+        errorf("venc channle %d > VENC_MAX_CHN_NUM\n", s32VencChnId);
+        return -1;
+    }
+    VENC_CHN_ATTR_S venc_chn_attr;
+    memset(&venc_chn_attr, 0, sizeof(venc_chn_attr));
+    
+    venc_chn_attr.stVencAttr.enType = RK_CODEC_TYPE_H264;
+    venc_chn_attr.stVencAttr.imageType = IMAGE_TYPE_NV12;
+    venc_chn_attr.stVencAttr.enRotation = VENC_ROTATION_0;
+    venc_chn_attr.stVencAttr.u32PicWidth = 1920;
+    venc_chn_attr.stVencAttr.u32PicHeight = 1080;
+    venc_chn_attr.stVencAttr.u32VirWidth = 1920;
+    venc_chn_attr.stVencAttr.u32VirHeight = 1080;
+    venc_chn_attr.stVencAttr.u32Profile = 66; //66: baseline; 77:MP; 100:HP;
+
+    venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = 50;
+    venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = 2048;
+    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
+    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 25;
+    venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
+    venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 25;
+
+    int ret = RK_MPI_VENC_CreateChn(s32VencChnId, &venc_chn_attr);
+    if (ret) {
+        errorf("create venc[%d] error! code:%d\n", s32VencChnId, ret);
+        return ret;
+    }
+    
+    MPP_CHN_S stEncChn;
+    stEncChn.enModId = RK_ID_VENC;
+    stEncChn.s32DevId = 0;
+    stEncChn.s32ChnId = s32VencChnId;
+    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, cbVenc);
+    if (ret) {
+        errorf("register cb for venc[%d] error! code:%d\n", s32VencChnId, ret);
+    }
+    return ret;
+}
+
+int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, OutCbFunc cbVenc) {
     if (s32VencChnId >= VENC_MAX_CHN_NUM) {
         errorf("venc channle %d > VENC_MAX_CHN_NUM\n", s32VencChnId);
         return -1;
