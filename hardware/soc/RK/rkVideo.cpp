@@ -8,10 +8,18 @@
  * Note        : 
  ************************************************************************/
 #include "rkVideo.h"
+#include "rkMedia.h"
+#include "infra/include/Logger.h"
+
+namespace hardware {
 
 static void media_video_callback(MEDIA_BUFFER mb);
 
-IVideo* rkVideo::instance() {
+IVideo* IVideo::instance() {
+    return rkVideo::instance();
+}
+
+rkVideo* rkVideo::instance() {
     static rkVideo s_video;
     return &s_video;
 }
@@ -57,7 +65,7 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
     return true;
 }
 
-bool rkVideo::deInitial() {
+bool rkVideo::deInitial(int32_t channel) {
     return false;
 }
 
@@ -70,6 +78,10 @@ bool rkVideo::getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeP
     params.bitrate = 90000;
     params.width = 1920;
     params.height = 1080;
+    return false;
+}
+
+bool rkVideo::requestIFrame(int32_t channel, int32_t sub_channel) {
     return false;
 }
 
@@ -142,9 +154,10 @@ static void media_video_callback(MEDIA_BUFFER mb) {
 
     RK_MPI_MB_ReleaseBuffer(mb);
 
-    MediaPlatformImpl::instance().distributeVideoFrame(0, sub_channel, frame);
+    rkVideo::instance()->distributeVideoFrame(0, sub_channel, frame);
 }
 
+/*
 bool rkVideo::initAudio() {
     if (media_audio_init() == 0) {
         // 单独使用一个线程接收音频数据
@@ -188,9 +201,11 @@ bool rkVideo::initAudio() {
 
                 RK_MPI_MB_ReleaseBuffer(mb);
 
-                MediaPlatformImpl::instance().distributeAudioFrame(frame);
+                rkVideo::instance().distributeAudioFrame(frame);
             }
         }).detach();
     }
     return true;
+}
+*/
 }

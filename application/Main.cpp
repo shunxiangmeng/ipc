@@ -117,12 +117,12 @@ int main(int argc, char* argv[]) {
     config.www_root_path = "E:/ulucu/code/mpegts.js/demo";
     config.default_index_file = "arib.html";
     IHttpServer::instance()->config(config);
-    IHttpServer::instance()->start(8080);
+    IHttpServer::instance()->start(18080);
 
     apiInit();
 
     AppMedia media;
-    //media.start();
+    media.start();
 
     RtspService::instance()->start(8554);
     PrivServer::instance()->start();

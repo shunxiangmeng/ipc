@@ -10,17 +10,24 @@
 #pragma once
 #include "hal/Video.h"
 
-class rkVideo : public IVideo, public infra::Thread {
+namespace hardware {
+
+class rkVideo : public IVideo {
     rkVideo() = default;
     virtual ~rkVideo() = default;
 public:
-    static IVideo* instance();
+    static rkVideo* instance();
 
     virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) override;
-    virtual bool deInitial() override;
+    virtual bool deInitial(int32_t channel = 0) override;
 
     virtual bool setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
     virtual bool getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
+
+    virtual bool requestIFrame(int32_t channel, int32_t sub_channel) override;
+
+    virtual bool startVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
+    virtual bool stopVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
 
     void distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFrame &frame);
     void distributeAudioFrame(MediaFrame &frame);
@@ -41,3 +48,5 @@ private:
     std::map<CodecChannel, std::shared_ptr<MediaStreamSignal>> video_callback_signals_;
     MediaStreamSignal audio_callback_signal_; 
 };
+
+}

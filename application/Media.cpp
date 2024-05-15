@@ -1,4 +1,4 @@
-#include "hardware/media/mediaPlatform.h"
+#include "hal/Video.h"
 #include "Media.h"
 #include "infra/include/Timestamp.h"
 
@@ -10,7 +10,10 @@ void startMedia(MediaStartProc start_proc, MediaStopProc stop_proc) {
 }
 
 bool AppMedia::start() {
-    media::IMediaPlatform::instance().initial(0);
+
+    std::vector<VideoEncodeParams> video_encode_params;
+
+    hardware::IVideo::instance()->initial(0, video_encode_params);
     //media::IMediaPlatform::instance().startVideoStream(0, 0, Func(&AppMedia::onVideoFrame, this));
     //media::IMediaPlatform::instance().startAudioStream(Func(&AppMedia::onAudioFrame, this));
 

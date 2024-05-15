@@ -4,7 +4,7 @@
 #include "soc/RK/include/rkmedia/rkmedia_api.h"
 #include "hal/Video.h"
 
-namespace media {
+namespace hardware {
 
 #define RK_VI_CHN_0     0
 #define RK_VI_CHN_1     1

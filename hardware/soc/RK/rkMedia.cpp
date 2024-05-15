@@ -6,7 +6,7 @@
 #include "soc/RK/include/rkaiq/uAPI/rk_aiq_user_api_imgproc.h"
 #include "infra/include/Logger.h"
 
-namespace media {
+namespace hardware {
 
 #define VI_BUFFER_COUNT 3
 #define MAX_AIQ_CTX 4
@@ -39,7 +39,7 @@ static RK_S32 RK_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL M
         return -1;
     }
 
-    infof("CamId: %d, sensor_name is %s, iqfiles is %s\n", CamId, aiq_static_info.sensor_info.sensor_name, iq_file_dir);
+    infof("CamId:%d, sensor_name:%s, iqfiles:%s\n", CamId, aiq_static_info.sensor_info.sensor_name, iq_file_dir);
 
     aiq_ctx = rk_aiq_uapi_sysctl_init(aiq_static_info.sensor_info.sensor_name, iq_file_dir, NULL, NULL);
     if (aiq_ctx == nullptr) {
@@ -105,6 +105,8 @@ int rk_mpi_isp_init(int channel) {
         errorf("RK_ISP_Init error\n");
         return -1;
     }
+    tracef("RK_ISP_Init succeed\n");
+    
     RK_ISP_Run(channel);
     RK_ISP_SetFrameRate(channel, fps);
 
