@@ -232,15 +232,58 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
     venc_chn_attr.stVencAttr.u32PicHeight = 1080;
     venc_chn_attr.stVencAttr.u32VirWidth = 1920;
     venc_chn_attr.stVencAttr.u32VirHeight = 1080;
-    venc_chn_attr.stVencAttr.u32Profile = 66; //66: baseline; 77:MP; 100:HP;
+    venc_chn_attr.stVencAttr.u32Profile = 0; //66: baseline; 77:MP; 100:HP;
 
     venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
     venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = 50;
     venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = 2048;
-    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
-    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 25;
     venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
     venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 25;
+    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
+    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 25;
+
+    int32_t gop = 50, bitrate = 1024, fps = 25;
+    if (params.gop.has_value()) {
+        gop = *params.gop;
+    }
+    if (params.bitrate.has_value()) {
+        bitrate = *params.bitrate;
+    }
+    if (params.fps.has_value()) {
+        fps = (int32_t)*params.fps;
+    }
+
+    if (params.codec.has_value()) {
+        switch (*params.codec) {
+            case H264:
+                venc_chn_attr.stVencAttr.enType = RK_CODEC_TYPE_H264;
+                venc_chn_attr.stVencAttr.u32Profile = 66; //66: baseline; 77:MP; 100:HP;
+                venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+
+                venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = gop;
+                venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate;
+                venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
+                venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 25;
+                venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
+                venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = fps;
+                break;
+
+            case H265:
+                venc_chn_attr.stVencAttr.enType = RK_CODEC_TYPE_H265;
+                venc_chn_attr.stVencAttr.u32Profile = 0;  //todo
+                venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+                break;
+        }
+    }
+
+    if (params.width.has_value()) {
+        venc_chn_attr.stVencAttr.u32PicWidth = *params.width;
+        venc_chn_attr.stVencAttr.u32VirWidth = *params.width;
+    }
+    if (params.height.has_value()) {
+        venc_chn_attr.stVencAttr.u32PicHeight = *params.height;
+        venc_chn_attr.stVencAttr.u32VirHeight = *params.height;
+    }
 
     int ret = RK_MPI_VENC_CreateChn(s32VencChnId, &venc_chn_attr);
     if (ret) {
@@ -287,7 +330,7 @@ static int rk_mpi_ai_aenc_init(void) {
     mpp_chn_ai.s32ChnId = 0;
 
     AI_CHN_ATTR_S ai_attr;
-    ai_attr.pcAudioNode = "default";
+    ai_attr.pcAudioNode = (char*)"default";
     ai_attr.enSampleFormat = RK_SAMPLE_FMT_S16;
     ai_attr.u32NbSamples = 320;
     ai_attr.u32SampleRate = 8000;

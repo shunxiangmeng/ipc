@@ -1,7 +1,7 @@
 #include <chrono>
 #include <thread>
 #include "Media.h"
-#include "common/mediafiles/mp4/MP4Reader.h"
+#include "configManager/include/IConfigManager.h"
 #include "rtsp/include/RtspService.h"
 #include "private/include/PrivServer.h"
 #include "http/include/IHttpServer.h"
@@ -13,25 +13,6 @@
 #include "infra/include/thread/WorkThreadPool.h"
 #include "api/api.h"
 
-class Test {
-public:
-    void startCallback(std::string &e) {
-        infof("test::callback a:%d, e:%s\n", a, e.data());
-    }
-    void stopCallback(std::string& e) {
-        infof("test::callback a:%d, e:%s\n", a, e.c_str());
-    }
-    int a = 100;
-};
-
-void mediaStartCallback(std::string &e) {
-    infof("callback %s\n", e.data());
-}
-void mediaStopCallback(std::string& e) {
-    infof("callback %s\n", e.data());
-}
-
-
 int main(int argc, char* argv[]) {
 
     std::shared_ptr<infra::LogChannel> console_log = std::make_shared<infra::ConsoleLogChannel>();
@@ -40,6 +21,9 @@ int main(int argc, char* argv[]) {
     //std::shared_ptr<infra::LogChannel> file_log = std::make_shared<infra::FileLogChannel>("log.log");
     //infra::Logger::instance().addLogChannel(file_log);
 
+    std::string config_path = "";
+    std::string default_config_path = "";
+    IConfigManager::instance()->init(config_path.data(), default_config_path.data());
 
     infof("bronco start............\n");
 
@@ -63,12 +47,6 @@ int main(int argc, char* argv[]) {
     
     infra::TimeDelta delta2 = t3 - *t2;
     tracef("delta2 micros %lld\n", delta2.micros());
-
-
-    //startMedia(mediaStartCallback, mediaStopCallback);
-    std::shared_ptr<Test> test = std::make_shared<Test>();
-    //startMedia(Func(&Test::startCallback, test.get()), Func(&Test::stopCallback, test.get()));
-
 
     infra::Buffer frame1;
     {

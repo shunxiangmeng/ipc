@@ -38,14 +38,20 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
         return false;
     }
 
-    // 创建VI
-    ret = rk_mpi_vi_create_chn(cam_id, 0, 1920, 1080);
-    if (ret) {
-        errorf("create vi %d error\n", 0);
-        return false;
-    }
-
     for (int i = 0; i < video_encode_params.size(); i++) {
+        // 创建VI
+        int32_t width = 1920, height = 1080;
+        if (video_encode_params[i].width.has_value()) {
+            width = *video_encode_params[i].width;
+        }
+        if (video_encode_params[i].height.has_value()) {
+            height = *video_encode_params[i].height;
+        }
+        ret = rk_mpi_vi_create_chn(cam_id, i, width, height);
+        if (ret) {
+            errorf("create vi %d error\n", i);
+            return false;
+        }
         // 创建VENC
         ret = rk_mpi_venc_create_chn(i, video_encode_params[i], media_video_callback);
         if (ret) {
@@ -54,9 +60,9 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
         }
 
         // 绑定VI VENC
-        ret = rk_mpi_vi_venc_bind(cam_id, 0, i);
+        ret = rk_mpi_vi_venc_bind(cam_id, i, i);
         if (ret) {
-            errorf("bind vi %d venc %d failed\n", 0, i);
+            errorf("bind vi %d venc %d failed\n", i, i);
             continue;
         }
     }
@@ -140,7 +146,7 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     MB_IMAGE_INFO_S image_info = {0};
     RK_MPI_MB_GetImageInfo(mb, &image_info);
 
-    //infof("chn:%d, flag:%d, pts:%llu, size:%d\n", sub_channel, flag, pts, int32_t(size));
+    infof("chn:%d, flag:%d, pts:%llu, size:%d\n", sub_channel, flag, pts, int32_t(size));
     
     MediaFrame frame;
     frame.ensureCapacity(int32_t(size));
