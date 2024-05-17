@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD 14)
 
 #编译详情
 #set(CMAKE_VERBOSE_MAKEFILE ON)
+# 消除GCC 7.x 的一个 abi 编译 note
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
 #交叉编译工具链信息
 include(${PROJECT_SOURCE_DIR}/Toolchains.cmake)
