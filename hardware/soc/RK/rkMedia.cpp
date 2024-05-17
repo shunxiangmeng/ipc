@@ -40,6 +40,14 @@ static RK_S32 RK_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL M
     }
 
     infof("CamId:%d, sensor_name:%s, iqfiles:%s\n", CamId, aiq_static_info.sensor_info.sensor_name, iq_file_dir);
+    for (int32_t i = 0; i < aiq_static_info.sensor_info.num; i++) {
+        infof("support_fmt[%d] width:%d, height:%d, fps:%d, format:0x%04X, hdr_mode:%d\n", i, 
+            aiq_static_info.sensor_info.support_fmt[i].width, 
+            aiq_static_info.sensor_info.support_fmt[i].height,
+            aiq_static_info.sensor_info.support_fmt[i].fps,
+            aiq_static_info.sensor_info.support_fmt[i].format,
+            aiq_static_info.sensor_info.support_fmt[i].hdr_mode);
+    }
 
     aiq_ctx = rk_aiq_uapi_sysctl_init(aiq_static_info.sensor_info.sensor_name, iq_file_dir, NULL, NULL);
     if (aiq_ctx == nullptr) {
@@ -89,7 +97,7 @@ RK_S32 RK_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
     return ret;
 }
 
-#define RK_ISP_AIQ_PATH "/app/config/iqfiles"
+#define RK_ISP_AIQ_PATH "/app/config/iqfiles/4mm/"
 
 int rk_mpi_isp_init(int channel) {
     rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
@@ -319,6 +327,33 @@ int rk_mpi_vi_venc_bind(RK_S32 s32ViPipe, RK_S32 s32ViChnId, RK_S32 s32VencChnId
         return -1;
     }
     return ret;
+}
+
+int rk_mpi_get_venc_attr(VENC_CHN s32VencChnId, VideoEncodeParams &params) {
+    VENC_CHN_ATTR_S venc_attr;
+    memset(&venc_attr, 0, sizeof(venc_attr));
+    RK_S32 ret = RK_MPI_VENC_GetVencChnAttr(s32VencChnId, &venc_attr);
+    if (ret) {
+        errorf("RK_MPI_VENC_GetVencChnAttr failed code:%d\n", ret);
+        return -1;
+    }
+
+    if (venc_attr.stVencAttr.enType == RK_CODEC_TYPE_H264) {
+        params.codec = H264;
+    } else if (venc_attr.stVencAttr.enType == RK_CODEC_TYPE_H265) {
+        params.codec = H265;
+    } else if (venc_attr.stVencAttr.enType == RK_CODEC_TYPE_JPEG) {
+        params.codec = Jpeg;
+    } else if (venc_attr.stVencAttr.enType == RK_CODEC_TYPE_MJPEG) {
+        params.codec = MJpeg;
+    } else {
+        errorf("error codectype %d\n", venc_attr.stVencAttr.enType);
+    }
+
+    params.width = venc_attr.stVencAttr.u32PicWidth;
+    params.height = venc_attr.stVencAttr.u32PicHeight;
+
+    return 0;
 }
 
 static int rk_mpi_ai_aenc_init(void) {

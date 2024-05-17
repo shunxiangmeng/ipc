@@ -67,6 +67,7 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
         }
     }
 
+    encode_params_ = video_encode_params;
     infof("rk_mpi_isp_init succ\n");
     return true;
 }
@@ -80,11 +81,7 @@ bool rkVideo::setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeP
 }
 
 bool rkVideo::getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams& params) {
-    params.codec = H264;
-    params.bitrate = 90000;
-    params.width = 1920;
-    params.height = 1080;
-    return false;
+    return rk_mpi_get_venc_attr(sub_channel, params) == 0;
 }
 
 bool rkVideo::requestIFrame(int32_t channel, int32_t sub_channel) {
@@ -123,37 +120,48 @@ void rkVideo::distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFr
     }
 }
 
+void rkVideo::getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32_t &width, int32_t &height) {
+    if (encode_params_.size() >= sub_channel + 1) {
+        if (encode_params_[sub_channel].codec.has_value()) {
+            codec = *encode_params_[sub_channel].codec;
+        }
+        if (encode_params_[sub_channel].width.has_value()) {
+            width = *encode_params_[sub_channel].width;
+        }
+        if (encode_params_[sub_channel].height.has_value()) {
+            height = *encode_params_[sub_channel].height;
+        }
+    }
+}
+
 static void media_video_callback(MEDIA_BUFFER mb) {
+    static VideoFrameInfo info[4];
+
     int sub_channel = RK_MPI_MB_GetChannelID(mb);
+    int flag = RK_MPI_MB_GetFlag(mb);
+    if (flag == VENC_NALU_IDRSLICE) {
+        info[sub_channel].type = VideoFrame_I;
+        rkVideo::instance()->getEncodeTypeWxH(sub_channel, info[sub_channel].codec, info[sub_channel].width, info[sub_channel].height);
+    } else {
+        info[sub_channel].type = VideoFrame_P;
+    }
+
     uint64_t pts = RK_MPI_MB_GetTimestamp(mb);
     pts = pts / 1000; //to ms
     size_t size = RK_MPI_MB_GetSize(mb);
     void *buffer = RK_MPI_MB_GetPtr(mb);
 
-    VideoFrameInfo info;
-
-    int flag = RK_MPI_MB_GetFlag(mb);
-    switch (flag) {
-        case VENC_NALU_IDRSLICE: info.type = VideoFrame_I; break;
-        case VENC_NALU_PSLICE: ; info.type = VideoFrame_P; break;
-        default: errorf("RK_MPI_MB_GetFlag %d error!\n", flag); break;
-    }
-
-    info.codec = H264;
-    info.width = 1920;
-    info.height = 1080;
-
     MB_IMAGE_INFO_S image_info = {0};
     RK_MPI_MB_GetImageInfo(mb, &image_info);
 
-    infof("chn:%d, flag:%d, pts:%llu, size:%d\n", sub_channel, flag, pts, int32_t(size));
+    //infof("chn:%d, flag:%d, pts:%llu, codec:%d, wxh:%dx%d, size:%d\n", sub_channel, flag, pts, (int32_t)info[sub_channel].codec, info[sub_channel].width, info[sub_channel].height, int32_t(size));
     
     MediaFrame frame;
     frame.ensureCapacity(int32_t(size));
     frame.putData((const char*)buffer, int32_t(size));
     frame.setSize(int32_t(size));
 
-    frame.setVideoFrameInfo(info);
+    frame.setVideoFrameInfo(info[sub_channel]);
     frame.setPlacementType(Annexb);
     frame.setMediaFrameType(Video);
     frame.setPts(pts).setDts(pts);

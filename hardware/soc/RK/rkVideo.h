@@ -32,12 +32,15 @@ public:
     void distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFrame &frame);
     void distributeAudioFrame(MediaFrame &frame);
 
+    void getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32_t &width, int32_t &height);
+
 private:
     bool initVideo();
     bool initAudio();
 
 private:
     bool init_;
+    std::vector<VideoEncodeParams> encode_params_;
     struct CodecChannel {
         int32_t channel;
         int32_t sub_channel;

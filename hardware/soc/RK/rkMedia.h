@@ -15,10 +15,10 @@ namespace hal {
 #define RK_VI_CHN_6     6
 #define RK_VI_CHN_7     7
 
-#define RKISPP_CHN0     "rkispp_m_bypass"
-#define RKISPP_CHN1     "rkispp_scale0"
-#define RKISPP_CHN2     "rkispp_scale1"
-#define RKISPP_CHN3     "rkispp_scale2"
+#define RKISPP_CHN0     "rkispp_scale0"
+#define RKISPP_CHN1     "rkispp_scale1"
+#define RKISPP_CHN2     "rkispp_scale2"
+#define RKISPP_CHN3     "rkispp_m_bypass"
 
 #define RK_ALSA_PATH    "default"
 
@@ -29,6 +29,8 @@ int rk_mpi_vi_create_chn(int32_t channel, int32_t stream_type, uint32_t width, u
 int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, OutCbFunc cbVenc);
 int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, OutCbFunc cbVenc);
 int rk_mpi_vi_venc_bind(RK_S32 s32ViPipe, RK_S32 s32ViChnId, RK_S32 s32VencChnId);
+
+int rk_mpi_get_venc_attr(VENC_CHN s32VencChnId, VideoEncodeParams &params);
 
 int media_audio_init(void);
 int media_audio_deinit(void);
