@@ -8,9 +8,13 @@
  * Note        : 
  ************************************************************************/
 #pragma once
+#include <map>
+#include <queue>
 #include "hal/Video.h"
 #include "infra/include/thread/Thread.h"
 #include "common/mediafiles/mp4/MP4Reader.h"
+
+namespace hal {
 
 class x86Video : public IVideo, public infra::Thread {
     x86Video();
@@ -18,9 +22,16 @@ class x86Video : public IVideo, public infra::Thread {
 public:
     static IVideo* instance();
 
-    virtual bool initial(const int config) override;
-    virtual bool deInitial() override;
+    virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) override;
+    virtual bool deInitial(int32_t channel = 0) override;
 
+    virtual bool setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
+    virtual bool getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
+
+    virtual bool requestIFrame(int32_t channel, int32_t sub_channel) override;
+
+    virtual bool startVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
+    virtual bool stopVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
 
 private:
     virtual void run() override;
@@ -40,3 +51,5 @@ private:
     std::queue<MediaFrame> video_frame_queue_;
     std::queue<MediaFrame> audio_frame_queue_;
 };
+
+}

@@ -1,6 +1,6 @@
 #include <map>
 #include <queue>
-#include "platform/media/mediaPlatform.h"
+#include "hardware/media/mediaPlatform.h"
 #include "infra/include/thread/Thread.h"
 #include "common/mediafiles/mp4/MP4Reader.h"
 
