@@ -1,4 +1,5 @@
 #include "hal/Video.h"
+#include "hal/Audio.h"
 #include "Media.h"
 #include "infra/include/Timestamp.h"
 #include "configManager/include/IConfigManager.h"
@@ -50,6 +51,8 @@ bool AppMedia::start() {
 
     hal::IVideo::instance()->initial(0, video_encode_params);
 
+    hal::AudioEncodeParams audio_encode_params;
+    hal::IAudio::instance()->initial(audio_encode_params);
 
     return true;
 }

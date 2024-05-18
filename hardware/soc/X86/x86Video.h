@@ -11,12 +11,11 @@
 #include <map>
 #include <queue>
 #include "hal/Video.h"
-#include "infra/include/thread/Thread.h"
 #include "common/mediafiles/mp4/MP4Reader.h"
 
 namespace hal {
 
-class x86Video : public IVideo, public infra::Thread {
+class x86Video : public IVideo {
     x86Video();
     virtual ~x86Video() = default;
 public:
@@ -30,13 +29,10 @@ public:
 
     virtual bool requestIFrame(int32_t channel, int32_t sub_channel) override;
 
-    virtual bool startVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
-    virtual bool stopVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
+    virtual bool startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
+    virtual bool stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
 
 private:
-    virtual void run() override;
-private:
-    bool init_;
     struct CodecChannel {
         int32_t channel;
         int32_t sub_channel;
@@ -44,12 +40,7 @@ private:
             return (this->channel * 10 + this->sub_channel) < (other.channel * 10 + other.sub_channel);
         }
     };
-    std::map<CodecChannel, std::shared_ptr<MediaStreamSignal>> video_callback_signals_;
-    MediaStreamSignal audio_callback_signal_;  // 音频只有一个通道,不考虑多 mic 的情况
-
-    MP4Reader mp4_reader_;
-    std::queue<MediaFrame> video_frame_queue_;
-    std::queue<MediaFrame> audio_frame_queue_;
+    std::map<CodecChannel, std::shared_ptr<VideoStreamSignal>> video_callback_signals_;
 };
 
 }
