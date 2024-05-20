@@ -88,12 +88,12 @@ bool rkVideo::requestIFrame(int32_t channel, int32_t sub_channel) {
     return false;
 }
 
-bool rkVideo::startVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) {
+bool rkVideo::startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) {
     infof("startVideoStream channel:%d, sub_channel:%d\n", channel, sub_channel);
     CodecChannel codec_channel{channel, sub_channel};
     auto it = video_callback_signals_.find(codec_channel);
     if (it == video_callback_signals_.end()) {
-        std::shared_ptr<MediaStreamSignal> video_signal = std::make_shared<MediaStreamSignal>();
+        std::shared_ptr<VideoStreamSignal> video_signal = std::make_shared<VideoStreamSignal>();
         video_signal->attach(proc);
         video_callback_signals_[codec_channel] = video_signal;
     } else if (it != video_callback_signals_.end()) {
@@ -102,7 +102,7 @@ bool rkVideo::startVideoStream(int32_t channel, int32_t sub_channel, MediaStream
     return false;
 }
 
-bool rkVideo::stopVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) {
+bool rkVideo::stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) {
     CodecChannel codec_channel{channel, sub_channel};
     auto it = video_callback_signals_.find(codec_channel);
     if (it != video_callback_signals_.end()) {
@@ -116,7 +116,7 @@ void rkVideo::distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFr
     CodecChannel codec_channel{channel, sub_channel};
     auto it = video_callback_signals_.find(codec_channel);
     if (it != video_callback_signals_.end()) {
-        (*it->second)(frame);
+        (*it->second)(channel, sub_channel, frame);
     }
 }
 
@@ -171,55 +171,4 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     rkVideo::instance()->distributeVideoFrame(0, sub_channel, frame);
 }
 
-/*
-bool rkVideo::initAudio() {
-    if (media_audio_init() == 0) {
-        // 单独使用一个线程接收音频数据
-        std::thread([]() {
-            AudioFrameInfo info;
-            info.codec = G711a;
-            info.channel = 1;
-            info.channel_count = 1;
-            info.bit_per_sample = 16;
-            info.sample_rate = 8000;
-            while (true) {
-                MEDIA_BUFFER mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_AENC, 0, -1);
-                //mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_AI, 0, -1);
-                if (mb == nullptr) {
-                    usleep(1000);
-                    continue;
-                }
-
-                uint64_t pts = RK_MPI_MB_GetTimestamp(mb);
-                pts = pts / 1000; //to ms
-                size_t size = RK_MPI_MB_GetSize(mb);
-                void *buffer = RK_MPI_MB_GetPtr(mb);
-
-                MediaFrame frame;
-                frame.ensureCapacity(int32_t(size));
-                frame.putData((const char*)buffer, int32_t(size));
-                frame.setSize(int32_t(size));
-                frame.setAudioFrameInfo(info);
-                frame.setMediaFrameType(Audio);
-                frame.setPts(pts).setDts(pts);
-
-                //tracef("Get Frame:ptr:%p, size:%zu, mode:%d, channel:%d, timestamp:%lld\n",
-                //    RK_MPI_MB_GetPtr(mb), RK_MPI_MB_GetSize(mb),
-                //    RK_MPI_MB_GetModeID(mb), RK_MPI_MB_GetChannelID(mb),
-                //    RK_MPI_MB_GetTimestamp(mb));
-
-                //uint8_t *data = (uint8_t*)buffer;
-                //tracef("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-                //    data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], 
-                //    data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15]);
-
-                RK_MPI_MB_ReleaseBuffer(mb);
-
-                rkVideo::instance().distributeAudioFrame(frame);
-            }
-        }).detach();
-    }
-    return true;
-}
-*/
 }

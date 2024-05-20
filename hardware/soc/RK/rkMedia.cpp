@@ -97,7 +97,8 @@ RK_S32 RK_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
     return ret;
 }
 
-#define RK_ISP_AIQ_PATH "/app/config/iqfiles/4mm/"
+//#define RK_ISP_AIQ_PATH "/app/config/iqfiles/4mm/"
+#define RK_ISP_AIQ_PATH "/app/config/iqfiles"
 
 int rk_mpi_isp_init(int channel) {
     rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;

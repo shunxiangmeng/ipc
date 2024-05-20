@@ -26,8 +26,8 @@ public:
 
     virtual bool requestIFrame(int32_t channel, int32_t sub_channel) override;
 
-    virtual bool startVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
-    virtual bool stopVideoStream(int32_t channel, int32_t sub_channel, MediaStreamProc proc) override;
+    virtual bool startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
+    virtual bool stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
 
     void distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFrame &frame);
     void distributeAudioFrame(MediaFrame &frame);
@@ -36,7 +36,6 @@ public:
 
 private:
     bool initVideo();
-    bool initAudio();
 
 private:
     bool init_;
@@ -48,8 +47,8 @@ private:
             return (this->channel * 10 + this->sub_channel) < (other.channel * 10 + other.sub_channel);
         }
     };
-    std::map<CodecChannel, std::shared_ptr<MediaStreamSignal>> video_callback_signals_;
-    MediaStreamSignal audio_callback_signal_; 
+    std::map<CodecChannel, std::shared_ptr<VideoStreamSignal>> video_callback_signals_;
+    VideoStreamSignal audio_callback_signal_; 
 };
 
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "media/media.h"
 #include "infra/include/Signal.h"
 #include "common/mediaframe/MediaFrame.h"
 
