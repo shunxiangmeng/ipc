@@ -29,6 +29,10 @@ public:
     virtual bool startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
     virtual bool stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
 
+    //virtual bool waitViImage(int32_t channel, int32_t sub_channel, int32_t timeout = -1) override;
+    virtual bool getViImage(int32_t channel, int32_t sub_channel, VideoImage &image, int32_t timeout = -1) override;
+
+
     void distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFrame &frame);
     void distributeAudioFrame(MediaFrame &frame);
 

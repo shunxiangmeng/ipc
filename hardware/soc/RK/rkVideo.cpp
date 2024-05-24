@@ -10,6 +10,8 @@
 #include "rkVideo.h"
 #include "rkMedia.h"
 #include "infra/include/Logger.h"
+#include "hardware/soc/RK/include/rga/rga.h"
+#include "hardware/soc/RK/include/rga/im2d.h"
 
 namespace hal {
 
@@ -169,6 +171,46 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     RK_MPI_MB_ReleaseBuffer(mb);
 
     rkVideo::instance()->distributeVideoFrame(0, sub_channel, frame);
+}
+
+bool rkVideo::getViImage(int32_t channel, int32_t sub_channel, VideoImage &image, int32_t timeout) {
+    MEDIA_BUFFER buf = RK_MPI_SYS_GetMediaBuffer(RK_ID_VI, sub_channel, timeout);
+    if (buf == nullptr) {
+        errorf("GetMediaBuffer chn [%d] wait %dms null...!\n", sub_channel, timeout);
+        return false;
+    }
+    MB_IMAGE_INFO_S stImageInfo;
+    RK_MPI_MB_GetImageInfo(buf, &stImageInfo);
+    uint64_t pts = RK_MPI_MB_GetTimestamp(buf);
+    //tracef("viimage pts:%lld\n", pts);
+
+    int width = stImageInfo.u32Width, height = stImageInfo.u32Height;
+    int src_format = RK_FORMAT_YCbCr_420_SP; // NV12
+    int dst_format = RK_FORMAT_RGB_888;      // 送算法需要rgb888
+
+    char *src_buf = (char*)RK_MPI_MB_GetPtr(buf);
+    char *dst_buf = (char*)image.data;
+
+    rga_buffer_t src = wrapbuffer_virtualaddr(src_buf, width, height, src_format);
+    rga_buffer_t dst = wrapbuffer_virtualaddr(dst_buf, width, height, dst_format);
+    IM_STATUS status = imcvtcolor(src, dst, src.format, dst.format);
+    if (status != IM_STATUS_SUCCESS) {
+        errorf("RGA imcvtcolor failed, status = %d\n", status);
+        RK_MPI_MB_ReleaseBuffer(buf);
+        return false;
+    }
+
+    static uint32_t frame_number = 0; 
+
+    image.width = width;
+    image.height = height;
+    image.stride - width;
+    image.timestamp = pts;
+    image.frame_number = frame_number++;
+    image.data_size = width * height * 3;
+
+    RK_MPI_MB_ReleaseBuffer(buf);
+    return true;
 }
 
 }

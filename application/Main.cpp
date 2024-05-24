@@ -12,6 +12,8 @@
 #include "infra/include/network/NetworkThreadPool.h"
 #include "infra/include/thread/WorkThreadPool.h"
 #include "api/api.h"
+#include "oac/include/OacServer.h"
+#include "OacClientTest.h"
 
 int main(int argc, char* argv[]) {
 
@@ -107,6 +109,11 @@ int main(int argc, char* argv[]) {
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
 
+
+    oac::IOacServer::instance()->start();
+
+    OacClientTest osc_client;
+    osc_client.init();
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
