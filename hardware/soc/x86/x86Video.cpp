@@ -89,4 +89,8 @@ bool x86Video::setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncode
     return false;
 }
 
+bool x86Video::getViImage(int32_t channel, int32_t sub_channel, VideoImage &image, int32_t timeout) {
+    return false;
+};
+
 }
