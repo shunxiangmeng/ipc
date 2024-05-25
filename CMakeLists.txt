@@ -57,6 +57,7 @@ add_subdirectory(common/middleware)
 add_subdirectory(hardware)
 add_subdirectory(application)
 
+if(WIN32)
 function(set_file_group prefix)
     message(STATUS "set_file_group " ${prefix} " " ${ARGC})
     foreach(FILE IN LISTS ARGN 1)
@@ -69,11 +70,8 @@ function(set_file_group prefix)
         source_group("${GROUP}" FILES "${FILE}")
     endforeach()
 endfunction()
-
-if(WIN32)
-    set_file_group(${CMAKE_SOURCE_DIR} ${APP_SOURCE_FILES} ${APP_SOURCE_HEADER_FILES})
+set_file_group(${CMAKE_SOURCE_DIR} ${APP_SOURCE_FILES} ${APP_SOURCE_HEADER_FILES})
 endif()
-
 
 #指定头文件路径
 include_directories(${APP_INCLUDE_DIRS})
