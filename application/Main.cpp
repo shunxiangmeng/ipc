@@ -3,7 +3,7 @@
 #include "Media.h"
 #include "configManager/include/IConfigManager.h"
 #include "rtsp/include/RtspService.h"
-#include "private/include/PrivServer.h"
+#include "private/include/IPrivServer.h"
 #include "http/include/IHttpServer.h"
 #include "infra/include/Logger.h"
 #include "infra/include/network/Pipe.h"
@@ -14,6 +14,11 @@
 #include "api/api.h"
 #include "oac/include/OacServer.h"
 #include "OacClientTest.h"
+#include "private/include/RpcServer.h"
+
+int add(int a, int b) {
+    return  a+ b;
+}
 
 int main(int argc, char* argv[]) {
 
@@ -105,15 +110,29 @@ int main(int argc, char* argv[]) {
     media.start();
 
     RtspService::instance()->start(8554);
-    PrivServer::instance()->start();
+    IPrivServer::instance()->start();
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
+
+    /*IPrivServer::instance()->rpcServer().register_handler("echo", [](int a, int b) -> int {
+        tracef("called rpc_echo, a:%d, b:%d\n", a, b);
+        //return std::to_string(a + b);
+        return a + b;
+    });
+    */
+
+    IPrivServer::instance()->rpcServer().register_handler("echo", []() -> int {
+        tracef("called rpc_echo\n");
+        //return std::to_string(a + b);
+        return 1;
+    });
 
 
     oac::IOacServer::instance()->start();
 
-    OacClientTest osc_client;
-    osc_client.init();
+    //OacClientTest osc_client;
+    //osc_client.init();
+
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
