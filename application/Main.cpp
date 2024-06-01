@@ -114,25 +114,7 @@ int main(int argc, char* argv[]) {
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
 
-    /*IPrivServer::instance()->rpcServer().register_handler("echo", [](int a, int b) -> int {
-        tracef("called rpc_echo, a:%d, b:%d\n", a, b);
-        //return std::to_string(a + b);
-        return a + b;
-    });
-    */
-
-    IPrivServer::instance()->rpcServer().register_handler("echo", []() -> int {
-        tracef("called rpc_echo\n");
-        //return std::to_string(a + b);
-        return 1;
-    });
-
-
     oac::IOacServer::instance()->start();
-
-    //OacClientTest osc_client;
-    //osc_client.init();
-
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
