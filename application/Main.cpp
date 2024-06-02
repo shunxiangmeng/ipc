@@ -14,7 +14,6 @@
 #include "api/api.h"
 #include "oac/include/OacServer.h"
 #include "OacClientTest.h"
-#include "private/include/RpcServer.h"
 
 int add(int a, int b) {
     return  a+ b;
