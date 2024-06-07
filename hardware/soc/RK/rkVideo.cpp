@@ -101,7 +101,8 @@ bool rkVideo::startStream(int32_t channel, int32_t sub_channel, VideoStreamProc 
     } else if (it != video_callback_signals_.end()) {
         return it->second->attach(proc) > 0 ? true : false;
     }
-    return false;
+    infof("create new stream channel:%d, sub_channel:%d\n", channel, sub_channel);
+    return true;
 }
 
 bool rkVideo::stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) {
@@ -156,6 +157,7 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     MB_IMAGE_INFO_S image_info = {0};
     RK_MPI_MB_GetImageInfo(mb, &image_info);
 
+    //if (sub_channel == 0)
     //infof("chn:%d, flag:%d, pts:%llu, codec:%d, wxh:%dx%d, size:%d\n", sub_channel, flag, pts, (int32_t)info[sub_channel].codec, info[sub_channel].width, info[sub_channel].height, int32_t(size));
     
     MediaFrame frame;
