@@ -139,6 +139,7 @@ void rkVideo::getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32
 
 static void media_video_callback(MEDIA_BUFFER mb) {
     static VideoFrameInfo info[4];
+    static int32_t s_sequence[4] = {0};
 
     int sub_channel = RK_MPI_MB_GetChannelID(mb);
     int flag = RK_MPI_MB_GetFlag(mb);
@@ -169,6 +170,7 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     frame.setPlacementType(Annexb);
     frame.setMediaFrameType(Video);
     frame.setPts(pts).setDts(pts);
+    frame.setSequence(s_sequence[sub_channel]++);
 
     RK_MPI_MB_ReleaseBuffer(mb);
 

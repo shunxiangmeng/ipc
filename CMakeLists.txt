@@ -58,6 +58,10 @@ add_subdirectory(common/middleware)
 add_subdirectory(hardware)
 add_subdirectory(application)
 
+# for freetype
+add_compile_definitions(DARWIN_NO_CARBON)
+add_compile_definitions(FT2_BUILD_LIBRARY)
+
 if(WIN32)
 function(set_file_group prefix)
     message(STATUS "set_file_group " ${prefix} " " ${ARGC})
