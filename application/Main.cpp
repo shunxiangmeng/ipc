@@ -14,6 +14,7 @@
 #include "api/api.h"
 #include "oac/include/OacServer.h"
 #include "OacClientTest.h"
+#include "platform/include/IPlatform.h"
 
 int add(int a, int b) {
     return  a+ b;
@@ -106,14 +107,20 @@ int main(int argc, char* argv[]) {
     apiInit();
 
     AppMedia media;
-    media.start();
+    //media.start();
 
-    RtspService::instance()->start(8554);
-    IPrivServer::instance()->start();
+    //RtspService::instance()->start(8554);
+    //IPrivServer::instance()->start();
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
 
     //oac::IOacServer::instance()->start();
+
+    auto platform = platform::IPlatform::create();
+
+
+    platform::DeviceAttribute attribute;
+    platform->init(&attribute);
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));

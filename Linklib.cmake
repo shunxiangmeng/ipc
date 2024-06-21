@@ -5,15 +5,12 @@ set(APP_DEPEND_LIBS)
 if (UNIX)
     set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} pthread rt m)
 elseif(WIN32)
+    set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} Ws2_32.lib Wldap32.lib Crypt32.lib Normaliz.lib libcurl.lib)
 endif()
-
-#only for test
-#link_directories(${PROJECT_SOURCE_DIR}/application/ulucu/lib)
-#set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} ulu_crypt uluai_core uluai_imgio uluai_ppose uluai_carplate uluai_dump_desc uluai_fea_ext uluai_objdet uluai_passflow uluai_speech_rec rknn_api)
-
 
 include(${PROJECT_SOURCE_DIR}/hardware/soc/${Platform}/Linklib.cmake)
 
-link_directories(${PROJECT_SOURCE_DIR}/hardware/soc/${PLATFORM}/lib)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/hardware/soc/${PLATFORM}/lib)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/common/thirdparty/prebuild/lib/win32)
 
 set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} ${PLATFORM_DEPEND_LIBS})
