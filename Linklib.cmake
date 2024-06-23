@@ -11,6 +11,6 @@ endif()
 include(${PROJECT_SOURCE_DIR}/hardware/soc/${Platform}/Linklib.cmake)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/hardware/soc/${PLATFORM}/lib)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/common/thirdparty/prebuild/lib/win32)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/common/thirdparty/prebuilts/lib/win32)
 
 set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} ${PLATFORM_DEPEND_LIBS})

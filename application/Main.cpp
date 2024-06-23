@@ -15,6 +15,7 @@
 #include "oac/include/OacServer.h"
 #include "OacClientTest.h"
 #include "platform/include/IPlatform.h"
+#include "ulucu/include/IUlucu.h"
 
 int add(int a, int b) {
     return  a+ b;
@@ -121,6 +122,8 @@ int main(int argc, char* argv[]) {
 
     platform::DeviceAttribute attribute;
     platform->init(&attribute);
+
+    ulucu::IUlucu::instance()->init();
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
