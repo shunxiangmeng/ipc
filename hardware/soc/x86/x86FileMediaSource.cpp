@@ -27,10 +27,10 @@ x86FileMediaSource::~x86FileMediaSource() {
 bool x86FileMediaSource::initial(const char* file_name) {
     if (!init_) {
         init_ = true;
-        std::string filename = "F:\\mp4\\The.Teacher.2022.HD1080P.X264.AAC.Malayalam.CHS.BDYS.mp4";
+        //std::string filename = "F:\\mp4\\The.Teacher.2022.HD1080P.X264.AAC.Malayalam.CHS.BDYS.mp4";
         //std::string filename = "/home/shawn/test.mp4";
         //std::string filename = "F:\\mp4\\HWZ.2022.EP01.HD1080P.X264.AAC.Mandarin.CHS.BDYS.mp4";
-        //std::string filename = "E:\\sample.mp4";
+        std::string filename = "E:\\output2.mp4";
         mp4_reader_.open(filename);
         Thread::start();
     }
@@ -69,6 +69,7 @@ void x86FileMediaSource::run() {
             if (frame.dts() <= now) {
                 if (video_callback_) {
                     video_callback_(0, 0, frame);
+                    video_callback_(0, 1, frame);
                 }
                 video_frame_queue_.pop();
             }

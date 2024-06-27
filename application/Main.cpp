@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     apiInit();
 
     AppMedia media;
-    //media.start();
+    media.start();
 
     //RtspService::instance()->start(8554);
     //IPrivServer::instance()->start();
