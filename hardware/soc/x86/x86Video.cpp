@@ -28,7 +28,8 @@ x86Video::x86Video() {
 bool x86Video::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) {
     x86FileMediaSource::instance().initial(nullptr);
     x86FileMediaSource::instance().startVideo([&](int32_t channel, int32_t sub_channel, MediaFrame& frame) {
-        auto it = video_callback_signals_.begin();
+        CodecChannel codec_channel{ channel, sub_channel };
+        auto it = video_callback_signals_.find(codec_channel);
         if (it != video_callback_signals_.end()) {
             (*it->second)(channel, sub_channel, frame);
         }

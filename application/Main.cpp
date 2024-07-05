@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
     media.start();
 
     RtspService::instance()->start(8554);
-    //IPrivServer::instance()->start();
+    IPrivServer::instance()->start();
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
     platform::DeviceAttribute attribute;
     platform->init(&attribute);
 
-    ulucu::IUlucu::instance()->init();
+    //ulucu::IUlucu::instance()->init();
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
