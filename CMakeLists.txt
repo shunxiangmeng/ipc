@@ -82,6 +82,7 @@ endif()
 include_directories(${APP_INCLUDE_DIRS})
 add_executable(${Tartget} ${APP_SOURCE_FILES} ${APP_SOURCE_HEADER_FILES})
 #添加依赖库
+message(STATUS "APP_DEPEND_LIBS: " ${APP_DEPEND_LIBS})
 target_link_libraries(${Tartget} ${APP_DEPEND_LIBS})
 
 #输出目录

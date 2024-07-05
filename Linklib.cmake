@@ -5,7 +5,7 @@ set(APP_DEPEND_LIBS)
 if (UNIX)
     set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} pthread rt m curl)
 elseif(WIN32)
-    set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} Ws2_32.lib Wldap32.lib Crypt32.lib Normaliz.lib libcurl.lib)
+    set(APP_DEPEND_LIBS ${APP_DEPEND_LIBS} pthreadVC2.lib kernel32.lib Ws2_32.lib Wldap32.lib Crypt32.lib Normaliz.lib libcurl.lib)
 endif()
 
 include(${PROJECT_SOURCE_DIR}/hardware/soc/${Platform}/Linklib.cmake)
