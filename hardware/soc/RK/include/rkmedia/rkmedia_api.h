@@ -100,11 +100,8 @@ _CAPI RK_S32 RK_MPI_SYS_StartGetMediaBuffer(MOD_ID_E enModID, RK_S32 s32ChnID);
 _CAPI RK_S32 RK_MPI_SYS_StopGetMediaBuffer(MOD_ID_E enModID, RK_S32 s32ChnID);
 _CAPI MEDIA_BUFFER RK_MPI_SYS_GetMediaBuffer(MOD_ID_E enModID, RK_S32 s32ChnID,
                                              RK_S32 s32MilliSec);
-_CAPI RK_S32 RK_MPI_SYS_SetFrameRate(MOD_ID_E enModID, RK_S32 s32ChnID,
-                                     MPP_FPS_ATTR_S *pstFpsAttr);
-_CAPI RK_S32
-RK_MPI_SYS_StartRecvFrame(MOD_ID_E enModID, RK_S32 s32ChnID,
-                          const MPP_RECV_PIC_PARAM_S *pstRecvParam);
+_CAPI RK_S32 RK_MPI_SYS_SetFrameRate(MOD_ID_E enModID, RK_S32 s32ChnID, MPP_FPS_ATTR_S *pstFpsAttr);
+_CAPI RK_S32 RK_MPI_SYS_StartRecvFrame(MOD_ID_E enModID, RK_S32 s32ChnID, const MPP_RECV_PIC_PARAM_S *pstRecvParam);
 _CAPI RK_S32 RK_MPI_LOG_SetLevelConf(LOG_LEVEL_CONF_S *pstConf);
 _CAPI RK_S32 RK_MPI_LOG_GetLevelConf(LOG_LEVEL_CONF_S *pstConf);
 

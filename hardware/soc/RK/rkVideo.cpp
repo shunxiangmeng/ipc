@@ -67,6 +67,7 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
             errorf("bind vi %d venc %d failed\n", i, i);
             continue;
         }
+        sub_channel_status_[i] = true;
     }
 
     encode_params_ = video_encode_params;
@@ -112,6 +113,10 @@ bool rkVideo::stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc p
         return it->second->detach(proc) >= 0 ? true : false;
     }
     return false;
+}
+
+bool rkVideo::streamIsStarted(int32_t channel, int32_t sub_channel) {
+    return sub_channel_status_[sub_channel];
 }
 
 void rkVideo::distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFrame &frame) {

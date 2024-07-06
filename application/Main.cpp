@@ -47,14 +47,14 @@ int main(int argc, char* argv[]) {
 
     if (t1.has_value() && t2.has_value()) {
         infra::TimeDelta delta = *t2 - *t1;
-        tracef("delta micros %lld\n", delta.micros());
+        //tracef("delta micros %lld\n", delta.micros());
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     infra::Timestamp t3 = infra::Timestamp::now();
     
     infra::TimeDelta delta2 = t3 - *t2;
-    tracef("delta2 micros %lld\n", delta2.micros());
+    //tracef("delta2 micros %lld\n", delta2.micros());
 
     infra::Buffer frame1;
     {
@@ -65,10 +65,10 @@ int main(int argc, char* argv[]) {
 
         frame1 = frame0;
 
-        infof("ObjectStatistic Buffer %d\n", infra::ObjectStatistic<infra::Buffer>::count());
+        //infof("ObjectStatistic Buffer %d\n", infra::ObjectStatistic<infra::Buffer>::count());
     }
 
-    infof("ObjectStatistic Buffer %d\n", infra::ObjectStatistic<infra::Buffer>::count());
+    //infof("ObjectStatistic Buffer %d\n", infra::ObjectStatistic<infra::Buffer>::count());
     //infof("frame1 size:%d, content:%s\n", frame1.size(), frame1.data());
     
 

@@ -40,6 +40,9 @@ static RK_S32 RK_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL M
     }
 
     infof("CamId:%d, sensor_name:%s, iqfiles:%s\n", CamId, aiq_static_info.sensor_info.sensor_name, iq_file_dir);
+    infof("has_lens_vcm:%d, has_fl:%d, fl_strth_adj_sup:%d, has_irc:%d, fl_ir_strth_adj_sup:%d\n", 
+        aiq_static_info.has_lens_vcm, aiq_static_info.has_fl, aiq_static_info.fl_strth_adj_sup, 
+        aiq_static_info.has_irc, aiq_static_info.fl_ir_strth_adj_sup);
     for (int32_t i = 0; i < aiq_static_info.sensor_info.num; i++) {
         infof("support_fmt[%d] width:%d, height:%d, fps:%d, format:0x%04X, hdr_mode:%d\n", i, 
             aiq_static_info.sensor_info.support_fmt[i].width, 
@@ -91,10 +94,31 @@ RK_S32 RK_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
     frameRateInfo_t info;
     info.mode = OP_MANUAL;
     info.fps = uFps;
-    RK_S32 ret = rk_aiq_uapi_setFrameRate(g_aiq_ctx[CamId], info);
-
+    XCamReturn ret = rk_aiq_uapi_setFrameRate(g_aiq_ctx[CamId], info);
+    if (ret < 0) {
+        errorf("SAMPLE_COMM_ISP_SetFrameRate %d error, ret:%d\n", uFps, ret);
+        return (RK_S32)ret;
+    }
     infof("SAMPLE_COMM_ISP_SetFrameRate %d succ\n", uFps);
     return ret;
+}
+
+int rk_mpi_isp_set_framerate(int camera_channel, uint32_t fps) {
+    return RK_ISP_SetFrameRate(camera_channel, fps);
+}
+
+int rk_mpi_isp_get_framerate(int camera_channel) {
+    if (camera_channel >= MAX_AIQ_CTX || !g_aiq_ctx[camera_channel]) {
+        errorf("%s : CamId is over 3 or not init\n");
+        return -1;
+    }
+    frameRateInfo_t info;
+    XCamReturn ret = rk_aiq_uapi_getFrameRate(g_aiq_ctx[camera_channel], &info);
+    if (ret < 0) {
+        errorf("rk_aiq_uapi_getFrameRate ret:%d\n", ret);
+        return (RK_S32)ret;
+    }
+    return info.fps;
 }
 
 #define RK_ISP_AIQ_PATH "/app/config/iqfiles/4mm/"
@@ -267,7 +291,7 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
             case H264:
                 venc_chn_attr.stVencAttr.enType = RK_CODEC_TYPE_H264;
                 venc_chn_attr.stVencAttr.u32Profile = 66; //66: baseline; 77:MP; 100:HP;
-                venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+                venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264VBR;
 
                 venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = gop;
                 venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate;
@@ -275,6 +299,13 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
                 venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 25;
                 venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
                 venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = fps;
+
+                venc_chn_attr.stRcAttr.stH264Vbr.u32Gop = gop;
+                venc_chn_attr.stRcAttr.stH264Vbr.u32MaxBitRate = bitrate;
+                venc_chn_attr.stRcAttr.stH264Vbr.u32SrcFrameRateDen = 1;
+                venc_chn_attr.stRcAttr.stH264Vbr.u32SrcFrameRateNum = 25;
+                venc_chn_attr.stRcAttr.stH264Vbr.fr32DstFrameRateDen = 1;
+                venc_chn_attr.stRcAttr.stH264Vbr.fr32DstFrameRateNum = fps;
                 break;
 
             case H265:

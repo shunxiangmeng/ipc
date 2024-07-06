@@ -24,6 +24,8 @@ namespace hal {
 
 int rk_mpi_isp_init(int camera_channel);
 int rk_mpi_isp_deinit(int camera_channel);
+int rk_mpi_isp_set_framerate(int camera_channel, uint32_t fps);
+int rk_mpi_isp_get_framerate(int camera_channel);
 int rk_mpi_system_init();
 int rk_mpi_vi_create_chn(int32_t channel, int32_t stream_type, uint32_t width, uint32_t height);
 int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, OutCbFunc cbVenc);

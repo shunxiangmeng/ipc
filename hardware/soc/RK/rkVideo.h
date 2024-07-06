@@ -28,6 +28,7 @@ public:
 
     virtual bool startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
     virtual bool stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
+    virtual bool streamIsStarted(int32_t channel, int32_t sub_channel) override;
 
     //virtual bool waitViImage(int32_t channel, int32_t sub_channel, int32_t timeout = -1) override;
     virtual bool getViImage(int32_t channel, int32_t sub_channel, VideoImage &image, int32_t timeout = -1) override;
@@ -43,6 +44,7 @@ private:
 
 private:
     bool init_;
+    bool sub_channel_status_[8] = {0};
     std::vector<VideoEncodeParams> encode_params_;
     struct CodecChannel {
         int32_t channel;
@@ -52,7 +54,7 @@ private:
         }
     };
     std::map<CodecChannel, std::shared_ptr<VideoStreamSignal>> video_callback_signals_;
-    VideoStreamSignal audio_callback_signal_; 
+    VideoStreamSignal audio_callback_signal_;
 };
 
 }
