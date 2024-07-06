@@ -78,10 +78,10 @@ bool AppMedia::start() {
     return true;
 }
 
-void AppMedia::onVideoConfigVerify(const char*, const Json::Value& config, IConfigManager::ApplyResults& result) {
-
+void AppMedia::onVideoConfigVerify(const char* name, const Json::Value& config, IConfigManager::ApplyResults& result) {
+    tracef("onVideoConfigVerify+++\n");
 }
 
-void AppMedia::onVideoConfigApply(const char*, const Json::Value& config, IConfigManager::ApplyResults& result) {
-
+void AppMedia::onVideoConfigApply(const char* name, const Json::Value& config, IConfigManager::ApplyResults& result) {
+    tracef("onVideoConfigApply+++\n");
 }
