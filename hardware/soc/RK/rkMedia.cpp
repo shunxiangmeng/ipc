@@ -275,6 +275,10 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
     venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
     venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 25;
 
+    venc_chn_attr.stGopAttr.enGopMode = VENC_GOPMODE_NORMALP;
+    venc_chn_attr.stGopAttr.u32GopSize = 50;
+    venc_chn_attr.stGopAttr.s32IPQpDelta = 1;
+
     int32_t gop = 50, bitrate = 1024, fps = 25;
     if (params.gop.has_value()) {
         gop = *params.gop;
@@ -325,12 +329,34 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
         venc_chn_attr.stVencAttr.u32VirHeight = *params.height;
     }
 
+    infof("RK_MPI_VENC_CreateChn %d\n", s32VencChnId);
     int ret = RK_MPI_VENC_CreateChn(s32VencChnId, &venc_chn_attr);
     if (ret) {
         errorf("create venc[%d] error! code:%d\n", s32VencChnId, ret);
         return ret;
     }
     
+    VENC_RC_PARAM_S venc_rc_param = {0};
+    ret = RK_MPI_VENC_GetRcParam(s32VencChnId, &venc_rc_param);
+    if (ret) {
+        errorf("RK_MPI_VENC_GetRcParam[%d] error! code:%d\n", s32VencChnId, ret);
+    }
+    tracef("s32FirstFrameStartQp:%d\n", venc_rc_param.s32FirstFrameStartQp);
+    tracef("u32StepQp:%d\n", venc_rc_param.stParamH264.u32StepQp);
+    tracef("u32MaxQp:%d\n", venc_rc_param.stParamH264.u32MaxQp);
+    tracef("u32MinQp:%d\n", venc_rc_param.stParamH264.u32MinQp);
+    tracef("u32MaxIQp:%d\n", venc_rc_param.stParamH264.u32MaxIQp);
+    tracef("u32MinIQp:%d\n", venc_rc_param.stParamH264.u32MinIQp);
+
+    venc_rc_param.stParamH264.u32StepQp = 1;
+    venc_rc_param.stParamH264.u32MaxQp = 24;
+    venc_rc_param.stParamH264.u32MaxIQp = 24;
+
+    ret = RK_MPI_VENC_SetRcParam(s32VencChnId, &venc_rc_param);
+    if (ret) {
+        errorf("RK_MPI_VENC_SetRcParam[%d] error! code:%d\n", s32VencChnId, ret);
+    }
+
     MPP_CHN_S stEncChn;
     stEncChn.enModId = RK_ID_VENC;
     stEncChn.s32DevId = 0;

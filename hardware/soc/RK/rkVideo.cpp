@@ -88,7 +88,7 @@ bool rkVideo::getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeP
 }
 
 bool rkVideo::requestIFrame(int32_t channel, int32_t sub_channel) {
-    return false;
+    return RK_MPI_VENC_RequestIDR(sub_channel, RK_TRUE) == 0;
 }
 
 bool rkVideo::startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) {

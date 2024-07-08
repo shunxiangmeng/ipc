@@ -79,9 +79,10 @@ bool AppMedia::start() {
 }
 
 void AppMedia::onVideoConfigVerify(const char* name, const Json::Value& config, IConfigManager::ApplyResults& result) {
-    tracef("onVideoConfigVerify+++\n");
+    tracef("onVideoConfigVerify:%s\n", config.toStyledString().data());
+
 }
 
 void AppMedia::onVideoConfigApply(const char* name, const Json::Value& config, IConfigManager::ApplyResults& result) {
-    tracef("onVideoConfigApply+++\n");
+    tracef("onVideoConfigApply:%s\n", config.toStyledString().data());
 }
