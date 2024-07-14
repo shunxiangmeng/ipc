@@ -26,9 +26,9 @@ rkVideo* rkVideo::instance() {
     return &s_video;
 }
 
-bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) {
+bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps) {
     int cam_id = channel;
-    int ret = rk_mpi_isp_init(cam_id);
+    int ret = rk_mpi_isp_init(cam_id, fps);
     if (ret < 0) {
         errorf("rk_mpi_isp_init error\n");
         return false;
@@ -40,8 +40,13 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
         return false;
     }
 
+    //int sensor_width, sensor_height, sensor_fps;
+    //rk_mpi_isp_get_sensor_capability(sensor_width, sensor_height, sensor_fps);
+
     for (int i = 0; i < video_encode_params.size(); i++) {
+        initVideo(channel, i, video_encode_params[i]);
         // 创建VI
+        #if 0
         int32_t width = 1920, height = 1080;
         if (video_encode_params[i].width.has_value()) {
             width = *video_encode_params[i].width;
@@ -49,6 +54,7 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
         if (video_encode_params[i].height.has_value()) {
             height = *video_encode_params[i].height;
         }
+
         ret = rk_mpi_vi_create_chn(cam_id, i, width, height);
         if (ret) {
             errorf("create vi %d error\n", i);
@@ -67,7 +73,7 @@ bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_enc
             errorf("bind vi %d venc %d failed\n", i, i);
             continue;
         }
-        sub_channel_status_[i] = true;
+        #endif
     }
 
     encode_params_ = video_encode_params;
@@ -79,8 +85,80 @@ bool rkVideo::deInitial(int32_t channel) {
     return false;
 }
 
+bool rkVideo::initVideo(int32_t channel, int32_t sub_channel, VideoEncodeParams &video_encode_params, int32_t fps) {
+    if (sub_channel_status_[sub_channel]) {
+        rk_mpi_vi_venc_unbind(channel, sub_channel, sub_channel);
+        RK_MPI_VENC_DestroyChn(sub_channel);
+        RK_MPI_VI_DisableChn(channel, sub_channel);
+        sub_channel_status_[sub_channel] = false;
+    }
+
+    // 创建VI
+    int32_t width = video_encode_params.width;
+    int32_t height = video_encode_params.height;
+
+    int ret = rk_mpi_vi_create_chn(channel, sub_channel, width, height);
+    if (ret) {
+        errorf("create vi %d error\n", sub_channel);
+        return false;
+    }
+    // 创建VENC
+    ret = rk_mpi_venc_create_chn(sub_channel, video_encode_params, media_video_callback, fps);
+    if (ret) {
+        errorf("create venc %d error\n", sub_channel);
+        return false;
+    }
+    ret = rk_mpi_vi_venc_bind(channel, sub_channel, sub_channel);
+    if (ret) {
+        errorf("bind vi %d venc %d failed\n", sub_channel, sub_channel);
+        return false;
+    }
+    sub_channel_status_[sub_channel] = true;
+    return true;
+}
+
 bool rkVideo::setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &params) {
-    return false;
+    if (params == encode_params_[sub_channel]) {
+        return true;
+    }
+
+    if (params.codec != encode_params_[sub_channel].codec 
+        || params.width != encode_params_[sub_channel].width || params.height != encode_params_[sub_channel].height) {
+        // 编码格式或者分辨率改变，需要重新创建编码器
+        int32_t src_fps = rk_mpi_isp_get_framerate(channel);
+        if (!initVideo(channel, sub_channel, params, src_fps)) {
+            return false;
+        }
+        encode_params_[sub_channel] = params;
+        return true;
+    }
+
+    if (params.gop != encode_params_[sub_channel].gop) {
+        int ret = RK_MPI_VENC_SetGop(sub_channel, params.gop);
+        if (ret != 0) {
+            errorf("venc %d set gop:%d error, ret = %d\n", sub_channel, params.gop, ret);
+            return false;
+        }
+    }
+    if (params.fps != encode_params_[sub_channel].fps) {
+        int32_t src_fps = rk_mpi_isp_get_framerate(channel);
+        int ret = RK_MPI_VENC_SetFps(sub_channel, params.fps, 1, src_fps, 1);
+        if (ret != 0) {
+            errorf("venc %d set fps:%d error, ret = %d\n", sub_channel, params.fps, ret);
+            return false;
+        }
+    }
+
+    if (params.bitrate != encode_params_[sub_channel].bitrate) {
+        int ret = RK_MPI_VENC_SetBitrate(sub_channel, params.bitrate * 1024, 32 * 1024, params.bitrate * 1024);
+        if (ret != 0) {
+            errorf("venc %d set bitrate:%d error, ret = %d\n", sub_channel, params.bitrate, ret);
+            return false;
+        }
+    }
+
+    encode_params_[sub_channel] = params;
+    return true;
 }
 
 bool rkVideo::getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams& params) {
@@ -89,6 +167,25 @@ bool rkVideo::getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeP
 
 bool rkVideo::requestIFrame(int32_t channel, int32_t sub_channel) {
     return RK_MPI_VENC_RequestIDR(sub_channel, RK_TRUE) == 0;
+}
+
+bool rkVideo::setResolution(int32_t channel, int32_t sub_channel, int32_t width, int32_t height) {
+    VI_CHN_ATTR_S vi_chn_attr;
+    RK_MPI_VI_GetChnAttr(channel, sub_channel, &vi_chn_attr);
+    if (width == vi_chn_attr.u32Width && height == vi_chn_attr.u32Height) {
+        tracef("new resolution == old resolution, no need set\n");
+        return true;
+    }
+
+    VideoEncodeParams encode_param = encode_params_[sub_channel];
+    encode_param.width = width;
+    encode_param.height = height;
+
+    if (!initVideo(channel, sub_channel, encode_param)) {
+        return false;
+    }
+    encode_params_[sub_channel] = encode_param;
+    return true;
 }
 
 bool rkVideo::startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) {
@@ -130,15 +227,9 @@ void rkVideo::distributeVideoFrame(int32_t channel, int32_t sub_channel, MediaFr
 
 void rkVideo::getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32_t &width, int32_t &height) {
     if (encode_params_.size() >= sub_channel + 1) {
-        if (encode_params_[sub_channel].codec.has_value()) {
-            codec = *encode_params_[sub_channel].codec;
-        }
-        if (encode_params_[sub_channel].width.has_value()) {
-            width = *encode_params_[sub_channel].width;
-        }
-        if (encode_params_[sub_channel].height.has_value()) {
-            height = *encode_params_[sub_channel].height;
-        }
+        codec = encode_params_[sub_channel].codec;
+        width = encode_params_[sub_channel].width;
+        height = encode_params_[sub_channel].height;
     }
 }
 

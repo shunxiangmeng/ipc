@@ -21,7 +21,7 @@ class x86Video : public IVideo {
 public:
     static IVideo* instance();
 
-    virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) override;
+    virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps = 25) override;
     virtual bool deInitial(int32_t channel = 0) override;
 
     virtual bool setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;

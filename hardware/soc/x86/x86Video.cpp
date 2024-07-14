@@ -25,7 +25,7 @@ IVideo* x86Video::instance() {
 x86Video::x86Video() {
 }
 
-bool x86Video::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) {
+bool x86Video::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps) {
     x86FileMediaSource::instance().initial(nullptr);
     x86FileMediaSource::instance().startVideo([&](int32_t channel, int32_t sub_channel, MediaFrame& frame) {
         CodecChannel codec_channel{ channel, sub_channel };

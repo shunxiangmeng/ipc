@@ -18,13 +18,15 @@ class rkVideo : public IVideo {
 public:
     static rkVideo* instance();
 
-    virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params) override;
+    virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps = 25) override;
     virtual bool deInitial(int32_t channel = 0) override;
 
     virtual bool setEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
     virtual bool getEncodeParams(int32_t channel, int32_t sub_channel, VideoEncodeParams &encode_params) override;
 
     virtual bool requestIFrame(int32_t channel, int32_t sub_channel) override;
+
+    virtual bool setResolution(int32_t channel, int32_t sub_channel, int32_t width, int32_t height) override;
 
     virtual bool startStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
     virtual bool stopStream(int32_t channel, int32_t sub_channel, VideoStreamProc proc) override;
@@ -40,7 +42,7 @@ public:
     void getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32_t &width, int32_t &height);
 
 private:
-    bool initVideo();
+    bool initVideo(int32_t channel, int32_t sub_channel, VideoEncodeParams &video_encode_params, int32_t fps = 25);
 
 private:
     bool init_;
