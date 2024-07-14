@@ -282,7 +282,7 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
 
     venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
     venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = gop;
-    venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate;
+    venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate * 1024;
     venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
     venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = src_fps;
     venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
@@ -299,14 +299,14 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
             venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264VBR;
 
             venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = gop;
-            venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate;
+            venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = bitrate * 1024;
             venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
             venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = src_fps;
             venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
             venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = fps;
 
             venc_chn_attr.stRcAttr.stH264Vbr.u32Gop = gop;
-            venc_chn_attr.stRcAttr.stH264Vbr.u32MaxBitRate = bitrate;
+            venc_chn_attr.stRcAttr.stH264Vbr.u32MaxBitRate = bitrate * 1024;
             venc_chn_attr.stRcAttr.stH264Vbr.u32SrcFrameRateDen = 1;
             venc_chn_attr.stRcAttr.stH264Vbr.u32SrcFrameRateNum = src_fps;
             venc_chn_attr.stRcAttr.stH264Vbr.fr32DstFrameRateDen = 1;
