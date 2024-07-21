@@ -57,6 +57,7 @@ add_subdirectory(common/thirdparty)
 add_subdirectory(common/middleware)
 add_subdirectory(hardware)
 add_subdirectory(application)
+add_subdirectory(common)
 
 # for freetype
 add_compile_definitions(DARWIN_NO_CARBON)

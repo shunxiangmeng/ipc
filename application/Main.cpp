@@ -11,6 +11,8 @@
 #include "infra/include/Timestamp.h"
 #include "infra/include/network/NetworkThreadPool.h"
 #include "infra/include/thread/WorkThreadPool.h"
+#include "infra/include/Command.h"
+#include "infra/include/RedirServer.h"
 #include "api/api.h"
 #include "oac/include/OacServer.h"
 #include "OacClientTest.h"
@@ -26,12 +28,15 @@ int main(int argc, char* argv[]) {
     std::shared_ptr<infra::LogChannel> console_log = std::make_shared<infra::ConsoleLogChannel>();
     infra::Logger::instance().addLogChannel(console_log);
 
-    //std::shared_ptr<infra::LogChannel> file_log = std::make_shared<infra::FileLogChannel>("log.log");
-    //infra::Logger::instance().addLogChannel(file_log);
+    std::shared_ptr<infra::LogChannel> file_log = std::make_shared<infra::FileLogChannel>("./log");
+    infra::Logger::instance().addLogChannel(file_log);
 
     std::string config_path = "";
     std::string default_config_path = "";
     IConfigManager::instance()->init(config_path.data(), default_config_path.data());
+
+    // 开启重定向功能
+    infra::RedirServer::instance("/tmp/broncoRedir")->start();
 
     infof("bronco start............\n");
 
