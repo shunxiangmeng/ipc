@@ -23,13 +23,17 @@ bool AppMedia::start() {
 
     configToEncodeParams(video, video_encode_params);
 
-    hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
+    //hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
+
+    hal::IVideo::instance()->initialVdsp(video_encode_params);
+    vdsp.initial("./test.mp4");
 
     hal::AudioEncodeParams audio_encode_params;
     hal::IAudio::instance()->initial(audio_encode_params);
 
     IConfigManager::instance()->attachVerify("video", IConfigManager::ConfigProc(&AppMedia::onVideoConfigVerify, this));
     IConfigManager::instance()->attachApply("video", IConfigManager::ConfigProc(&AppMedia::onVideoConfigApply, this));
+
 
     return true;
 }

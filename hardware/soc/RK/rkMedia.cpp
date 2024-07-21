@@ -14,6 +14,13 @@ static rk_aiq_sys_ctx_t *g_aiq_ctx[MAX_AIQ_CTX];
 static rk_aiq_working_mode_t g_WDRMode[MAX_AIQ_CTX];
 static rk_frame_fmt_t s_sensor_format;
 
+static inline int32_t align(int32_t x, int32_t divsor) {
+    if (x % divsor) {
+        x = (x + divsor - 1) / divsor * divsor;
+    }
+    return x;
+}
+
 static RK_S32 RK_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL MultiCam, const char *iq_file_dir) {
     if (CamId >= MAX_AIQ_CTX) {
         errorf("CamId is over 3\n");
@@ -276,8 +283,8 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
     venc_chn_attr.stVencAttr.enRotation = VENC_ROTATION_0;
     venc_chn_attr.stVencAttr.u32PicWidth = params.width;
     venc_chn_attr.stVencAttr.u32PicHeight = params.height;
-    venc_chn_attr.stVencAttr.u32VirWidth = params.width;
-    venc_chn_attr.stVencAttr.u32VirHeight = params.height;
+    venc_chn_attr.stVencAttr.u32VirWidth = align(params.width, 16);
+    venc_chn_attr.stVencAttr.u32VirHeight = align(params.height, 16);
     venc_chn_attr.stVencAttr.u32Profile = 0; //66: baseline; 77:MP; 100:HP;
 
     venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
@@ -392,6 +399,25 @@ int rk_mpi_vi_venc_unbind(RK_S32 s32ViPipe, RK_S32 s32ViChnId, RK_S32 s32VencChn
     int ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
     if (ret) {
         errorf("error: bind vi[0] to venc[0] error! code:%d\n", ret);
+        return -1;
+    }
+    return ret;
+}
+
+int rk_mpi_vdec_venc_bind(RK_S32 s32ViPipe, RK_S32 s32VdecChnId, RK_S32 s32VencChnId) {
+    MPP_CHN_S stSrcChn;
+    stSrcChn.enModId = RK_ID_VDEC;
+    stSrcChn.s32DevId = s32ViPipe;
+    stSrcChn.s32ChnId = s32VdecChnId;
+    
+    MPP_CHN_S stDestChn;
+    stDestChn.enModId = RK_ID_VENC;
+    stDestChn.s32DevId = s32ViPipe;
+    stDestChn.s32ChnId = s32VencChnId;
+    
+    int ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    if (ret) {
+        errorf("error: bind vdec[%d] to venc[%d] error! code:%d\n", s32VdecChnId, s32VencChnId, ret);
         return -1;
     }
     return ret;

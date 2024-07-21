@@ -18,6 +18,10 @@ class rkVideo : public IVideo {
 public:
     static rkVideo* instance();
 
+    virtual bool setVsdpMode() override;
+    virtual bool initialVdsp(std::vector<VideoEncodeParams> &video_encode_params) override;
+    virtual bool sendFrameVdsp(MediaFrame &frame) override;
+
     virtual bool initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps = 25) override;
     virtual bool deInitial(int32_t channel = 0) override;
 
@@ -45,6 +49,7 @@ private:
     bool initVideo(int32_t channel, int32_t sub_channel, VideoEncodeParams &video_encode_params, int32_t fps = 25);
 
 private:
+    bool vdsp_mode_ = false; 
     bool init_;
     bool sub_channel_status_[8] = {0};
     std::vector<VideoEncodeParams> encode_params_;

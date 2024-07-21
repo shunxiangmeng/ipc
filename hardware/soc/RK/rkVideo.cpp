@@ -26,6 +26,12 @@ rkVideo* rkVideo::instance() {
     return &s_video;
 }
 
+bool rkVideo::setVsdpMode() {
+    vdsp_mode_ = true;
+    warnf("turn on vdsp mode\n");
+    return true;
+}
+
 bool rkVideo::initial(int32_t channel, std::vector<VideoEncodeParams> &video_encode_params, int32_t fps) {
     int cam_id = channel;
     int ret = rk_mpi_isp_init(cam_id, fps);
@@ -312,5 +318,93 @@ bool rkVideo::getViImage(int32_t channel, int32_t sub_channel, VideoImage &image
     RK_MPI_MB_ReleaseBuffer(buf);
     return true;
 }
+
+
+bool rkVideo::initialVdsp(std::vector<VideoEncodeParams> &video_encode_params) { 
+    int ret = rk_mpi_system_init();
+    if (ret) {
+        errorf("rk_mpi_system_init failed\n");
+        return false;
+    }
+    VDEC_CHN_ATTR_S stVdecAttr{};
+    stVdecAttr.enCodecType = RK_CODEC_TYPE_H264;
+    stVdecAttr.enMode = VIDEO_MODE_FRAME;
+    if (stVdecAttr.enCodecType == RK_CODEC_TYPE_JPEG) {
+        stVdecAttr.enMode = VIDEO_MODE_FRAME;
+    } else {
+        stVdecAttr.enMode = VIDEO_MODE_STREAM;
+    }
+    stVdecAttr.enDecodecMode = VIDEO_DECODEC_HADRWARE;
+
+    //stVdecAttr.enMode = VIDEO_MODE_FRAME;
+
+    ret = RK_MPI_VDEC_CreateChn(0, &stVdecAttr);
+    if (ret) {
+        errorf("Create Vdec[0] failed! ret=%d\n", ret);
+        return false;
+    }
+
+    // 创建VENC
+    int32_t sub_channel = 0;
+    int32_t fps = 25;
+    ret = rk_mpi_venc_create_chn(sub_channel, video_encode_params[0], media_video_callback, fps);
+    if (ret) {
+        errorf("create venc %d error\n", sub_channel);
+        return false;
+    }
+    ret = rk_mpi_vdec_venc_bind(0, sub_channel, sub_channel);
+    if (ret) {
+        errorf("bind vdec %d venc %d failed\n", sub_channel, sub_channel);
+        return false;
+    } else {
+        infof("bind vdec %d venc %d succ\n", sub_channel, sub_channel);
+    }
+    sub_channel_status_[sub_channel] = true;
+    encode_params_ = video_encode_params;
+    return true; 
+
+    std::thread([]() {
+        while(true) {
+            MEDIA_BUFFER  mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_VDEC, 0, 1000);
+            if (!mb) {
+                errorf("RK_MPI_SYS_GetMediaBuffer get null buffer in 5s...\n");
+                continue;
+            }
+            MB_IMAGE_INFO_S stImageInfo = {0};
+            int ret = RK_MPI_MB_GetImageInfo(mb, &stImageInfo);
+            if (ret) {
+                errorf("Get image info failed! ret = %d\n", ret);
+                RK_MPI_MB_ReleaseBuffer(mb);
+                continue;
+            }
+
+            tracef("Get Frame:ptr:%p, fd:%d, size:%zu, mode:%d, channel:%d, "
+                    "timestamp:%lld, ImgInfo:<wxh %dx%d, fmt 0x%x>\n",
+                    RK_MPI_MB_GetPtr(mb), RK_MPI_MB_GetFD(mb), RK_MPI_MB_GetSize(mb),
+                    RK_MPI_MB_GetModeID(mb), RK_MPI_MB_GetChannelID(mb),
+                    RK_MPI_MB_GetTimestamp(mb), stImageInfo.u32Width,
+                    stImageInfo.u32Height, stImageInfo.enImgType);
+            RK_MPI_MB_ReleaseBuffer(mb);
+        }
+    }).detach();
+
+    return true; 
+};
+
+bool rkVideo::sendFrameVdsp(MediaFrame &frame) {
+    MEDIA_BUFFER mb = RK_MPI_MB_CreateBuffer(frame.size(), RK_TRUE, 0);
+    memcpy(RK_MPI_MB_GetPtr(mb), frame.data(), frame.size());
+    RK_MPI_MB_SetSize(mb, frame.size());
+    RK_MPI_MB_SetTimestamp(mb, frame.dts() * 1000);
+    int ret = RK_MPI_SYS_SendMediaBuffer(RK_ID_VDEC, 0, mb);
+    if (ret != 0) {
+        errorf("RK_MPI_SYS_SendMediaBuffer failed ret = %d\n", ret);
+    } else {
+        //tracef("vdec send buffer succ size:%d, pts:%lld\n", frame.size(), frame.pts());
+    }
+    RK_MPI_MB_ReleaseBuffer(mb);
+    return ret == 0; 
+};
+
 
 }

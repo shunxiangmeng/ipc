@@ -33,6 +33,7 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, OutCbFunc cbVenc);
 int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, OutCbFunc cbVenc, int32_t src_fps = 25);
 int rk_mpi_vi_venc_bind(RK_S32 s32ViPipe, RK_S32 s32ViChnId, RK_S32 s32VencChnId);
 int rk_mpi_vi_venc_unbind(RK_S32 s32ViPipe, RK_S32 s32ViChnId, RK_S32 s32VencChnId);
+int rk_mpi_vdec_venc_bind(RK_S32 s32ViPipe, RK_S32 s32VdecChnId, RK_S32 s32VencChnId);
 
 int rk_mpi_get_venc_attr(VENC_CHN s32VencChnId, VideoEncodeParams &params);
 
