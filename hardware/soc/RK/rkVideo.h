@@ -46,6 +46,7 @@ public:
     void getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32_t &width, int32_t &height);
 
 private:
+    void initLogLevel(int level);
     bool initVideo(int32_t channel, int32_t sub_channel, VideoEncodeParams &video_encode_params, int32_t fps = 25);
 
 private:

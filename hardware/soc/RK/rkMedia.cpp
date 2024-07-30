@@ -423,12 +423,12 @@ int rk_mpi_vdec_venc_bind(RK_S32 s32ViPipe, RK_S32 s32VdecChnId, RK_S32 s32VencC
     return ret;
 }
 
-int rk_mpi_get_venc_attr(VENC_CHN s32VencChnId, VideoEncodeParams &params) {
+int rk_mpi_get_venc_attr(VENC_CHN venc_chn, VideoEncodeParams &params) {
     VENC_CHN_ATTR_S venc_attr;
     memset(&venc_attr, 0, sizeof(venc_attr));
-    RK_S32 ret = RK_MPI_VENC_GetVencChnAttr(s32VencChnId, &venc_attr);
+    RK_S32 ret = RK_MPI_VENC_GetVencChnAttr(venc_chn, &venc_attr);
     if (ret) {
-        errorf("RK_MPI_VENC_GetVencChnAttr failed code:%d\n", ret);
+        errorf("RK_MPI_VENC_GetVencChnAttr chn:%d failed code:%d\n", venc_chn, ret);
         return -1;
     }
 

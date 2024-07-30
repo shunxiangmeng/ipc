@@ -28,7 +28,9 @@ bool AppMedia::start() {
 
     //hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
 
+    hal::IVideo::instance()->setVsdpMode();
     hal::IVideo::instance()->initialVdsp(video_encode_params);
+
     vdsp.initial("./test.mp4");
 
     hal::AudioEncodeParams audio_encode_params;
