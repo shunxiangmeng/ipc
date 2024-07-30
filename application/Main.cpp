@@ -2,7 +2,7 @@
 #include <thread>
 #include "Media.h"
 #include "configManager/include/IConfigManager.h"
-#include "rtsp/include/RtspService.h"
+#include "rtsp/include/IRtspService.h"
 #include "private/include/IPrivServer.h"
 #include "http/include/IHttpServer.h"
 #include "infra/include/Logger.h"
@@ -115,7 +115,8 @@ int main(int argc, char* argv[]) {
     AppMedia media;
     media.start();
 
-    RtspService::instance()->start(8554);
+    IRtspService::instance()->start(8554);
+    IRtspService::instance()->setAuthority(false);
     IPrivServer::instance()->start();
     //std::this_thread::sleep_for(std::chrono::milliseconds(40));
     //RtspService::instance()->stop();
