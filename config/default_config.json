@@ -8,7 +8,7 @@
 				"height": 1080,
 				"gop": 50,
 				"bitrate": 2048,
-				"bitrate_type", "vbr",
+				"bitrate_type": "vbr",
 				"fps": 25.0
 			},
 			{
@@ -17,7 +17,7 @@
 				"height": 480,
 				"gop": 50,
 				"bitrate": 1024,
-				"bitrate_type", "vbr",
+				"bitrate_type": "vbr",
 				"fps": 25.0
 			}
 		]
