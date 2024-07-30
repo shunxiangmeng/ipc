@@ -1,22 +1,27 @@
 {
-    "video": [
-        {
-            "codec": "H265",
-            "width": 1920,
-            "height": 1080,
-            "gop": 50,
-            "bitrate": 2048,
-            "fps": 25.0
-        },
-        {
-            "codec": "H265",
-            "width": 640,
-            "height": 480,
-            "gop": 50,
-            "bitrate": 1024,
-            "fps": 25.0
-        }
-    ],
+    "video": {
+		"format": "pal",
+		"config": [
+			{
+				"codec": "H265",
+				"width": 1920,
+				"height": 1080,
+				"gop": 50,
+				"bitrate": 2048,
+				"bitrate_type", "vbr",
+				"fps": 25.0
+			},
+			{
+				"codec": "H265",
+				"width": 640,
+				"height": 480,
+				"gop": 50,
+				"bitrate": 1024,
+				"bitrate_type", "vbr",
+				"fps": 25.0
+			}
+		]
+	},
     "audio": {
 
     }

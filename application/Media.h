@@ -15,7 +15,7 @@ private:
     void onVideoConfigVerify(const char*, const Json::Value& config, IConfigManager::ApplyResults& result);
     void onVideoConfigApply(const char*, const Json::Value& config, IConfigManager::ApplyResults& result);
 
-    void configToEncodeParams(const Json::Value &video, std::vector<hal::VideoEncodeParams> &video_encode_params);
+    bool configToEncodeParams(const Json::Value &video, std::vector<hal::VideoEncodeParams> &video_encode_params);
 private:
     VirtualDSP vdsp;
 };

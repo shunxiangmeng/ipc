@@ -12,7 +12,7 @@ bool AppMedia::start() {
     Json::Value video;
     IConfigManager::instance()->getConfig("video", video);
     int32_t video_sample_fps = 25;
-    if (video.isMember("format") && video["format"].isString()) {
+    if (video.isObject() && video.isMember("format") && video["format"].isString()) {
         std::string video_format = video["format"].asString();
         if (video_format == "ntsc") {
             video_sample_fps = 30;
@@ -21,7 +21,10 @@ bool AppMedia::start() {
         }
     }
 
-    configToEncodeParams(video, video_encode_params);
+    if (!configToEncodeParams(video, video_encode_params)) {
+        errorf("start media error\n");
+        return false;
+    }
 
     //hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
 
@@ -34,11 +37,14 @@ bool AppMedia::start() {
     IConfigManager::instance()->attachVerify("video", IConfigManager::ConfigProc(&AppMedia::onVideoConfigVerify, this));
     IConfigManager::instance()->attachApply("video", IConfigManager::ConfigProc(&AppMedia::onVideoConfigApply, this));
 
-
     return true;
 }
 
-void AppMedia::configToEncodeParams(const Json::Value &video, std::vector<hal::VideoEncodeParams> &video_encode_params) {
+bool AppMedia::configToEncodeParams(const Json::Value &video, std::vector<hal::VideoEncodeParams> &video_encode_params) {
+    if (!video.isObject() || !video.isMember("config")) {
+        warnf("get video config error\n");
+        return false;
+    }
     const Json::Value &config = video["config"];
     tracef("videoconfig:%s\n", video.toStyledString().data());
     if (config.isArray()) {
@@ -82,6 +88,7 @@ void AppMedia::configToEncodeParams(const Json::Value &video, std::vector<hal::V
             video_encode_params.push_back(params);
         }
     }
+    return true;
 }
 
 void AppMedia::onVideoConfigVerify(const char* name, const Json::Value& config, IConfigManager::ApplyResults& result) {
