@@ -26,12 +26,13 @@ bool AppMedia::start() {
         return false;
     }
 
-    //hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
-
+    #if 1
+    hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
+    #else
     hal::IVideo::instance()->setVsdpMode();
     hal::IVideo::instance()->initialVdsp(video_encode_params);
-
     vdsp.initial("./test.mp4");
+    #endif
 
     hal::AudioEncodeParams audio_encode_params;
     hal::IAudio::instance()->initial(audio_encode_params);

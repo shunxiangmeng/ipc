@@ -223,49 +223,7 @@ int rk_mpi_vi_create_chn(RK_S32 s32ViPipe, VI_CHN s32ViChnId, uint32_t width, ui
     return ret;
 }
 
-int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, OutCbFunc cbVenc) {
-    if (s32VencChnId >= VENC_MAX_CHN_NUM) {
-        errorf("venc channle %d > VENC_MAX_CHN_NUM\n", s32VencChnId);
-        return -1;
-    }
-    VENC_CHN_ATTR_S venc_chn_attr;
-    memset(&venc_chn_attr, 0, sizeof(venc_chn_attr));
-    
-    venc_chn_attr.stVencAttr.enType = RK_CODEC_TYPE_H264;
-    venc_chn_attr.stVencAttr.imageType = IMAGE_TYPE_NV12;
-    venc_chn_attr.stVencAttr.enRotation = VENC_ROTATION_0;
-    venc_chn_attr.stVencAttr.u32PicWidth = 1920;
-    venc_chn_attr.stVencAttr.u32PicHeight = 1080;
-    venc_chn_attr.stVencAttr.u32VirWidth = 1920;
-    venc_chn_attr.stVencAttr.u32VirHeight = 1080;
-    venc_chn_attr.stVencAttr.u32Profile = 66; //66: baseline; 77:MP; 100:HP;
-
-    venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-    venc_chn_attr.stRcAttr.stH264Cbr.u32Gop = 50;
-    venc_chn_attr.stRcAttr.stH264Cbr.u32BitRate = 2048;
-    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
-    venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 25;
-    venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
-    venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 25;
-
-    int ret = RK_MPI_VENC_CreateChn(s32VencChnId, &venc_chn_attr);
-    if (ret) {
-        errorf("create venc[%d] error! code:%d\n", s32VencChnId, ret);
-        return ret;
-    }
-    
-    MPP_CHN_S stEncChn;
-    stEncChn.enModId = RK_ID_VENC;
-    stEncChn.s32DevId = 0;
-    stEncChn.s32ChnId = s32VencChnId;
-    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, cbVenc);
-    if (ret) {
-        errorf("register cb for venc[%d] error! code:%d\n", s32VencChnId, ret);
-    }
-    return ret;
-}
-
-int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, OutCbFunc cbVenc, int32_t src_fps) {
+int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, OutCbFunc cbVenc, int32_t src_fps, bool virtual_addr_align) {
     if (s32VencChnId >= VENC_MAX_CHN_NUM) {
         errorf("venc channle %d > VENC_MAX_CHN_NUM\n", s32VencChnId);
         return -1;
@@ -283,8 +241,8 @@ int rk_mpi_venc_create_chn(VENC_CHN s32VencChnId, VideoEncodeParams &params, Out
     venc_chn_attr.stVencAttr.enRotation = VENC_ROTATION_0;
     venc_chn_attr.stVencAttr.u32PicWidth = params.width;
     venc_chn_attr.stVencAttr.u32PicHeight = params.height;
-    venc_chn_attr.stVencAttr.u32VirWidth = align(params.width, 16);
-    venc_chn_attr.stVencAttr.u32VirHeight = align(params.height, 16);
+    venc_chn_attr.stVencAttr.u32VirWidth = virtual_addr_align ? align(params.width, 16) : params.width;
+    venc_chn_attr.stVencAttr.u32VirHeight = virtual_addr_align ? align(params.height, 16) : params.height;
     venc_chn_attr.stVencAttr.u32Profile = 0; //66: baseline; 77:MP; 100:HP;
 
     venc_chn_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;

@@ -320,8 +320,8 @@ bool rkVideo::getViImage(int32_t channel, int32_t sub_channel, VideoImage &image
 
     MB_IMAGE_INFO_S stImageInfo;
     RK_MPI_MB_GetImageInfo(buf, &stImageInfo);
-    uint64_t pts = RK_MPI_MB_GetTimestamp(buf);
-    tracef("viimage pts:%lld\n", pts);
+    uint64_t pts = RK_MPI_MB_GetTimestamp(buf) / 1000;
+    //tracef("viimage pts:%lld\n", pts);
 
     int width = stImageInfo.u32Width, height = stImageInfo.u32Height;
     int src_format = RK_FORMAT_YCbCr_420_SP; // NV12
@@ -382,7 +382,7 @@ bool rkVideo::initialVdsp(std::vector<VideoEncodeParams> &video_encode_params) {
     // 创建VENC
     for (int sub_channel = 0; sub_channel < video_encode_params.size(); sub_channel++) {
     int32_t fps = 25;
-    ret = rk_mpi_venc_create_chn(sub_channel, video_encode_params[0], media_video_callback, fps);
+    ret = rk_mpi_venc_create_chn(sub_channel, video_encode_params[0], media_video_callback, fps, true);
         if (ret) {
             errorf("create venc %d error\n", sub_channel);
             continue;
