@@ -26,6 +26,13 @@ rkVideo* rkVideo::instance() {
     return &s_video;
 }
 
+rkVideo::~rkVideo() {
+    if (alg_resize_buffer_) {
+        free(alg_resize_buffer_);
+        alg_resize_buffer_ = nullptr;
+    }
+}
+
 void rkVideo::initLogLevel(int level) {
     LOG_LEVEL_CONF_S log_level;
     for (int i = RK_ID_VB; i < RK_ID_BUTT; i++) {
@@ -323,14 +330,47 @@ bool rkVideo::getViImage(int32_t channel, int32_t sub_channel, VideoImage &image
     uint64_t pts = RK_MPI_MB_GetTimestamp(buf) / 1000;
     //tracef("viimage pts:%lld\n", pts);
 
-    int width = stImageInfo.u32Width, height = stImageInfo.u32Height;
+    int o_width = stImageInfo.u32Width, o_height = stImageInfo.u32Height;
+    int width = 640, height = 480;
+    bool resize = false;
+
     int src_format = RK_FORMAT_YCbCr_420_SP; // NV12
     int dst_format = RK_FORMAT_RGB_888;      // 送算法需要rgb888
 
     char *src_buf = (char*)RK_MPI_MB_GetPtr(buf);
     char *dst_buf = (char*)image.data;
 
-    rga_buffer_t src = wrapbuffer_virtualaddr(src_buf, width, height, src_format);
+    if (o_width != 640 || o_height != 480) {
+        if (alg_resize_buffer_ == nullptr) {
+            alg_resize_buffer_ = (char*)malloc(width * height * 3 / 2);
+            if (alg_resize_buffer_ == nullptr) {
+                errorf("malloc %d failed\n", width * height * 3 / 2);
+            } else {
+                infof("malloc resize buffer succ\n");
+            }
+        }
+
+        if (alg_resize_buffer_) {
+            rga_buffer_t src0 = wrapbuffer_virtualaddr(src_buf, o_width, o_height, src_format);
+            rga_buffer_t dst0 = wrapbuffer_virtualaddr(alg_resize_buffer_, width, height, src_format);
+            double scale_x = width * 1.0 / o_width;
+            double scale_y = height * 1.0 / o_height;
+            IM_STATUS status = imresize(src0, dst0, scale_x, scale_y);
+            if (status != IM_STATUS_SUCCESS) {
+                errorf("RGA imresize failed, status = %d\n", status);
+                RK_MPI_MB_ReleaseBuffer(buf);
+                return false;
+            }
+            resize = true;
+        }
+    }
+
+    rga_buffer_t src;
+    if (resize) {
+        src = wrapbuffer_virtualaddr(alg_resize_buffer_, width, height, src_format);
+    } else {
+        src = wrapbuffer_virtualaddr(src_buf, width, height, src_format);
+    }
     rga_buffer_t dst = wrapbuffer_virtualaddr(dst_buf, width, height, dst_format);
     IM_STATUS status = imcvtcolor(src, dst, src.format, dst.format);
     if (status != IM_STATUS_SUCCESS) {

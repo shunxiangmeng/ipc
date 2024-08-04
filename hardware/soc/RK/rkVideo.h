@@ -14,7 +14,7 @@ namespace hal {
 
 class rkVideo : public IVideo {
     rkVideo() = default;
-    virtual ~rkVideo() = default;
+    virtual ~rkVideo();
 public:
     static rkVideo* instance();
 
@@ -63,6 +63,8 @@ private:
     };
     std::map<CodecChannel, std::shared_ptr<VideoStreamSignal>> video_callback_signals_;
     VideoStreamSignal audio_callback_signal_;
+
+    char* alg_resize_buffer_ = nullptr;
 };
 
 }
