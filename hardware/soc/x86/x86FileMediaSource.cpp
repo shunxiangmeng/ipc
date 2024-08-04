@@ -30,7 +30,8 @@ bool x86FileMediaSource::initial(const char* file_name) {
         //std::string filename = "F:\\mp4\\The.Teacher.2022.HD1080P.X264.AAC.Malayalam.CHS.BDYS.mp4";
         //std::string filename = "/home/shawn/test.mp4";
         //std::string filename = "F:\\mp4\\HWZ.2022.EP01.HD1080P.X264.AAC.Mandarin.CHS.BDYS.mp4";
-        std::string filename = "E:\\output2.mp4";
+        //std::string filename = "E:\\output2.mp4";
+        std::string filename = "E:\\ps.mp4";
         mp4_reader_.open(filename);
         Thread::start();
     }
@@ -61,12 +62,13 @@ void x86FileMediaSource::getAudioInfo(AudioFrameInfo &audioinfo) {
 
 void x86FileMediaSource::run() {
     infof("MediaPlatformImpl thread start\n");
+    int64_t pts_offset = 0;
     MediaFrame frame;
     while (running()) {
         int64_t now = infra::getCurrentTimeMs();
         if (!video_frame_queue_.empty()) {
             frame = video_frame_queue_.front();
-            if (frame.dts() <= now) {
+            if (frame.dts() <= now - pts_offset) {
                 if (video_callback_) {
                     video_callback_(0, 0, frame);
                     video_callback_(0, 1, frame);
@@ -76,7 +78,7 @@ void x86FileMediaSource::run() {
         }
         if (!audio_frame_queue_.empty()) {
             frame = audio_frame_queue_.front();
-            if (frame.dts() <= now) {
+            if (frame.dts() <= now - pts_offset) {
                 if (audio_callback_) {
                     audio_callback_(frame);
                 }
@@ -103,6 +105,10 @@ void x86FileMediaSource::run() {
             //mp4_reader_.seek(&timestamp);
             //warnf("seek to %lld\n", timestamp);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        if (pts_offset == 0) {
+            pts_offset = infra::getCurrentTimeMs() - frame.dts();
         }
         //std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
