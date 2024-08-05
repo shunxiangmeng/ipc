@@ -27,11 +27,7 @@ x86FileMediaSource::~x86FileMediaSource() {
 bool x86FileMediaSource::initial(const char* file_name) {
     if (!init_) {
         init_ = true;
-        //std::string filename = "F:\\mp4\\The.Teacher.2022.HD1080P.X264.AAC.Malayalam.CHS.BDYS.mp4";
-        //std::string filename = "/home/shawn/test.mp4";
-        //std::string filename = "F:\\mp4\\HWZ.2022.EP01.HD1080P.X264.AAC.Mandarin.CHS.BDYS.mp4";
-        //std::string filename = "E:\\output2.mp4";
-        std::string filename = "E:\\ps.mp4";
+        std::string filename = file_name;
         mp4_reader_.open(filename);
         Thread::start();
     }
