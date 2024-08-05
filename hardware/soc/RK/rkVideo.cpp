@@ -275,6 +275,7 @@ void rkVideo::getEncodeTypeWxH(int32_t sub_channel, VideoCodecType &codec, int32
 static void media_video_callback(MEDIA_BUFFER mb) {
     static VideoFrameInfo info[4];
     static int32_t s_sequence[4] = {0};
+    static int64_t s_last_pts[4] = {0};
 
     int sub_channel = RK_MPI_MB_GetChannelID(mb);
     int flag = RK_MPI_MB_GetFlag(mb);
@@ -292,6 +293,12 @@ static void media_video_callback(MEDIA_BUFFER mb) {
 
     MB_IMAGE_INFO_S image_info = {0};
     RK_MPI_MB_GetImageInfo(mb, &image_info);
+
+    if (pts == s_last_pts[sub_channel]) {
+        //warnf("chn:%d, pts == last_pts %lld\n", sub_channel, pts);
+        pts += 40; //打一个补丁
+    }
+    s_last_pts[sub_channel] = pts;
 
     //if (sub_channel == 0)
     //infof("chn:%d, flag:%d, pts:%llu, codec:%d, wxh:%dx%d, size:%d\n", sub_channel, flag, pts, (int32_t)info[sub_channel].codec, info[sub_channel].width, info[sub_channel].height, int32_t(size));
