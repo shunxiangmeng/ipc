@@ -10,6 +10,7 @@
 #include "rkVideo.h"
 #include "rkMedia.h"
 #include "infra/include/Logger.h"
+#include "infra/include/Timestamp.h"
 #include "hardware/soc/RK/include/rga/rga.h"
 #include "hardware/soc/RK/include/rga/im2d.h"
 
@@ -295,7 +296,7 @@ static void media_video_callback(MEDIA_BUFFER mb) {
     RK_MPI_MB_GetImageInfo(mb, &image_info);
 
     if (pts == s_last_pts[sub_channel]) {
-        //warnf("chn:%d, pts == last_pts %lld\n", sub_channel, pts);
+        warnf("chn:%d, pts == last_pts %lld\n", sub_channel, pts);
         pts += 40; //打一个补丁
     }
     s_last_pts[sub_channel] = pts;
