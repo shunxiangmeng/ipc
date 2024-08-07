@@ -26,12 +26,20 @@ bool AppMedia::start() {
         return false;
     }
 
-    #if 1
+    #if 0
     hal::IVideo::instance()->initial(0, video_encode_params, video_sample_fps);
     #else
+    VideoFrameInfo videoinfo;
+    vdsp.initial("./194538.mp4");
+    vdsp.getVideoInfo(videoinfo);
+
+    // 编码宽高使用视频的宽高
+    for (auto &it : video_encode_params) {
+        it.width = videoinfo.width;
+        it.height = videoinfo.height;
+    }
     hal::IVideo::instance()->setVsdpMode();
     hal::IVideo::instance()->initialVdsp(video_encode_params);
-    vdsp.initial("./test.mp4");
     #endif
 
     hal::AudioEncodeParams audio_encode_params;
